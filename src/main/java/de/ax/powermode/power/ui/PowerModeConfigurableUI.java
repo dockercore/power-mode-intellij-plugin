@@ -614,8 +614,8 @@ public class PowerModeConfigurableUI implements ConfigurableUi<PowerMode> {
     }
 
     private abstract class MyChangeListener implements ChangeListener, ValueSettable {
-        private JSlider slider;
-        private JLabel jLabel;
+        private final JSlider slider;
+        private final JLabel jLabel;
 
         public MyChangeListener(JSlider slider, JLabel jLabel) {
             this.slider = slider;

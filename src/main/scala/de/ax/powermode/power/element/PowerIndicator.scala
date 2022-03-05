@@ -1,8 +1,8 @@
 package de.ax.powermode.power.element
 
 import com.intellij.openapi.editor.Editor
-import de.ax.powermode.{PowerMode, Util}
 import de.ax.powermode.power.ElementOfPower
+import de.ax.powermode.{PowerMode, Util}
 
 import java.awt._
 import java.awt.image.BufferedImage

@@ -1,14 +1,14 @@
 package de.ax.powermode
 
 import com.intellij.util.PathUtil
+import de.ax.powermode.cache.Cache
+import de.ax.powermode.power.element.PowerFlame
 
 import java.awt.image.BufferedImage
 import java.io.{BufferedOutputStream, File, FileOutputStream, InputStream}
 import java.net.{URI, URL}
 import javax.imageio.{IIOException, ImageIO}
 import scala.util.{Failure, Success, Try}
-import cache.Cache
-import de.ax.powermode.power.element.PowerFlame
 
 object ImageUtil {
   def imagesForPath(folder: Option[File]): scala.List[BufferedImage] = {
@@ -66,25 +66,27 @@ object ImageUtil {
         maybeImg match {
           case Success(Some(img)) =>
             val bufferedImage = new BufferedImage(img.getWidth,
-              img.getHeight,
-              BufferedImage.TYPE_INT_ARGB)
+                                                  img.getHeight,
+                                                  BufferedImage.TYPE_INT_ARGB)
             val graphics = bufferedImage.getGraphics
             graphics.drawImage(img, 0, 0, null)
             Some(bufferedImage)
           case Failure(e) =>
             e match {
-              case io:IIOException =>
+              case io: IIOException =>
                 PowerMode.logger
                   .error(
                     s"could not load image file! Please try to store your PowerMode " +
                       s"Images/Animations in a different folder and restart the application! File not found: '$uri'!",
-                    e)
+                    e
+                  )
               case ex =>
                 PowerMode.logger
                   .error(
                     s"could not load image file! Please try to store your PowerMode " +
                       s"Images/Animations in a different folder and restart the application! File not found: '$uri'!",
-                    ex)
+                    ex
+                  )
             }
             None
           case Success(None) =>
@@ -187,8 +189,9 @@ object ImageUtil {
     val tempFile =
       File.createTempFile(System.currentTimeMillis() + "_pmtempfile_", ".png")
     tempFile.deleteOnExit()
-    writeBytes(LazyList.continually(stream.read).takeWhile(_ != -1).map(_.toByte),
-               tempFile)
+    writeBytes(
+      LazyList.continually(stream.read).takeWhile(_ != -1).map(_.toByte),
+      tempFile)
     tempFile.toURI.toURL
   }
 }

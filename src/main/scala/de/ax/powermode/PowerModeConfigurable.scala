@@ -19,13 +19,13 @@ import com.intellij.openapi.options.ConfigurableBase
 import de.ax.powermode.power.ui.PowerModeConfigurableUI
 
 /**
- * @author Baptiste Mesta
- */
+  * @author Baptiste Mesta
+  */
 class PowerModeConfigurable()
-  extends ConfigurableBase[PowerModeConfigurableUI, PowerMode](
-    "power.mode.II",
-    "Power Mode II",
-    "power.mode.II") {
+    extends ConfigurableBase[PowerModeConfigurableUI, PowerMode](
+      "power.mode.II",
+      "Power Mode II",
+      "power.mode.II") {
   val settings: PowerMode = PowerMode.getInstance
 
   protected def getSettings: PowerMode = {

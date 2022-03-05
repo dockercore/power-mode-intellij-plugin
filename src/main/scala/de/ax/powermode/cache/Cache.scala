@@ -1,8 +1,6 @@
 package de.ax.powermode.cache
 
-import scala.collection.mutable
-
-;
+import scala.collection.mutable;
 
 class Cache[K, V, I](compareValue: K => I, shoudUpdate: K => Boolean) {
 
@@ -13,7 +11,10 @@ class Cache[K, V, I](compareValue: K => I, shoudUpdate: K => Boolean) {
     val maybeV1 = if (shoudUpdate(k)) {
       None
     } else {
-      cache.get(k).collect { case (v, i) => if (kInfo == i) Some(v) else None }.flatten
+      cache
+        .get(k)
+        .collect { case (v, i) => if (kInfo == i) Some(v) else None }
+        .flatten
     }
     maybeV1 match {
       case Some(v) =>

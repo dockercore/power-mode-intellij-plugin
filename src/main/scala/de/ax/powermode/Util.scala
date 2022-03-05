@@ -28,7 +28,7 @@ object Util {
             .contains(impl.getEditorKind) &&
           !impl.isOneLineMode
         } catch {
-          case _ :Throwable => false
+          case _: Throwable => false
         }
       case _ =>
         false
@@ -41,7 +41,7 @@ object Util {
         try {
           impl.getPreferredSize.height < maxSize || impl.getPreferredSize.width < maxSize
         } catch {
-          case _ :Throwable=> true
+          case _: Throwable => true
         }
       case _ =>
         false
@@ -53,7 +53,7 @@ object Util {
       f
     } catch {
       case e: Throwable =>
-      throw e
+        throw e
     }
   }
 

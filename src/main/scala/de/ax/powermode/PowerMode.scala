@@ -34,8 +34,8 @@ import scala.collection.immutable.Seq
 import scala.util.Try
 
 /**
- * @author Baptiste Mesta
- */
+  * @author Baptiste Mesta
+  */
 object PowerMode {
 
   val logger: Logger = Logger.getLogger(classOf[PowerMode])
@@ -65,9 +65,9 @@ object PowerMode {
 }
 
 @State(name = "PowerModeII",
-  storages = Array(new Storage(file = "$APP_CONFIG$/power.mode.ii.xml")))
+       storages = Array(new Storage(file = "$APP_CONFIG$/power.mode.ii.xml")))
 class PowerMode
-  extends ApplicationComponent
+    extends ApplicationComponent
     with PersistentStateComponent[PowerMode] {
   type HeatupKey = (Option[KeyStroke], Long)
   val mediaPlayerExists = Try {
@@ -136,8 +136,8 @@ class PowerMode
   }
 
   def increaseHeatup(
-                      dataContext: Option[DataContext] = Option.empty[DataContext],
-                      keyStroke: Option[KeyStroke] = Option.empty[KeyStroke]): Unit = {
+      dataContext: Option[DataContext] = Option.empty[DataContext],
+      keyStroke: Option[KeyStroke] = Option.empty[KeyStroke]): Unit = {
     val ct = System.currentTimeMillis()
     lastKeys = (keyStroke, ct) :: filterLastKeys(ct)
     dataContext.foreach(dc =>
@@ -171,8 +171,8 @@ class PowerMode
         val keysWorth = lastKeys.map {
           case (Some(ks), _) =>
             val size = Seq(InputEvent.CTRL_DOWN_MASK,
-              InputEvent.ALT_DOWN_MASK,
-              InputEvent.SHIFT_DOWN_MASK).count(m =>
+                           InputEvent.ALT_DOWN_MASK,
+                           InputEvent.SHIFT_DOWN_MASK).count(m =>
               (ks.getModifiers & m) > 0)
             val res = size * hotkeyWeight
             res
@@ -204,8 +204,8 @@ class PowerMode
         val keysWorth = lastKeys.map {
           case (Some(ks), _) =>
             val size = Seq(InputEvent.CTRL_DOWN_MASK,
-              InputEvent.ALT_DOWN_MASK,
-              InputEvent.SHIFT_DOWN_MASK).count(m =>
+                           InputEvent.ALT_DOWN_MASK,
+                           InputEvent.SHIFT_DOWN_MASK).count(m =>
               (ks.getModifiers & m) > 0)
             val res = size * hotkeyWeight
             res

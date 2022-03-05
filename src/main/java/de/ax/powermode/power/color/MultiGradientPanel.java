@@ -15,14 +15,12 @@ public class MultiGradientPanel extends JPanel {
     private ColorEdges colorEdges;
 
 
-
     public MultiGradientPanel(int size, ColorEdges colorEdges) {
         super();
         this.size = size;
         this.colorEdges = colorEdges;
         this.setPreferredSize(new Dimension(size, size));
     }
-
 
 
     @Override

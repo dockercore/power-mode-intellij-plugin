@@ -20,9 +20,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.{EditorFactoryAdapter, EditorFactoryEvent}
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import de.ax.powermode.{Power, PowerMode, Util}
-import de.ax.powermode.PowerMode.logger
 import de.ax.powermode.power.sound.PowerSound
+import de.ax.powermode.{Power, PowerMode, Util}
 
 import java.awt._
 import javax.swing._
@@ -90,7 +89,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
             }
           }
         } catch {
-          case e :Throwable => PowerMode.logger.error(e.getMessage, e)
+          case e: Throwable => PowerMode.logger.error(e.getMessage, e)
         }
       }
     }
