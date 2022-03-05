@@ -12,14 +12,17 @@ lazy val powerMode =
       Global / intellijAttachSources := true,
       Compile / javacOptions ++= "--release" :: "11" :: Nil,
       intellijPlugins += "com.intellij.properties".toPlugin,
-      libraryDependencies += "com.eclipsesource.minimal-json" % "minimal-json" % "0.9.5" withSources(),
+      libraryDependencies ++= Seq(
+        "com.eclipsesource.minimal-json" % "minimal-json" % "0.9.5" withSources(),
+        "javazoom" % "jlayer" % "1.0.1"
+      ),
       unmanagedJars in Compile += baseDirectory.value / "lib",
       unmanagedResourceDirectories in Compile += baseDirectory.value / "resources",
       resourceDirectories in Runtime += baseDirectory.value / "resources",
       unmanagedResourceDirectories in Test += baseDirectory.value / "testResources",
       packageMethod := PackagingMethod.Standalone()
-//        ,
-//      bundleScalaLibrary in ThisBuild := true
+      //        ,
+      //      bundleScalaLibrary in ThisBuild := true
 
     )
     
