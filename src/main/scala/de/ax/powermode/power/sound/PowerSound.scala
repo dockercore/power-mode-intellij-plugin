@@ -1,10 +1,10 @@
 package de.ax.powermode.power.sound
 
 import de.ax.powermode.Power
-import javafx.embed.swing.JFXPanel
-import javafx.scene.media.{Media, MediaPlayer}
+import javazoom.jl.player.{FactoryRegistry, HackyJavaSoundAudioDevice, Player}
 
 import java.io.File
+import scala.language.postfixOps
 
 /**
   * Created by nyxos on 03.10.16.
@@ -33,7 +33,7 @@ class PowerSound(folder: => Option[File], valueFactor: => Double)
   var current = 1
 
   def setVolume(v: Double) = this.synchronized {
-    mediaPlayer.foreach(_.setVolume((0.75 * v * v) + (0.25 * v)))
+    mediaPlayer.foreach(_.setVolume((0.75 * v * v) + (0.25 * v) toFloat))
   }
 
   private def doStop() = {
@@ -66,18 +66,16 @@ class PowerSound(folder: => Option[File], valueFactor: => Double)
     val myFiles: Array[File] = files
     if (!playing && myFiles != null && !myFiles.isEmpty) {
       index = (Math.random() * (200 * myFiles.length)).toInt % myFiles.length
-      val f = myFiles(index).toURI.toString
+      val f = myFiles(index)
       logger.info(s"playing sound file '$f'")
       try {
         playing = true
-        new JFXPanel
-        val hit = new Media(f)
         mediaPlayer = Some {
-          val mediaPlayer = new MediaPlayer(hit)
-          mediaPlayer.setOnError(ResetPlaying)
-          mediaPlayer.setOnStopped(ResetPlaying)
-          mediaPlayer.setOnEndOfMedia(ResetPlaying)
-          mediaPlayer.setVolume(valueFactor)
+          val mediaPlayer = new de.ax.powermode.power.sound.MediaPlayer(f)
+          mediaPlayer.onError(() => {
+            logger.debug("resetting")
+            ResetPlaying.run() })
+          mediaPlayer.setVolume(valueFactor.toFloat)
           mediaPlayer.play()
           mediaPlayer
         }

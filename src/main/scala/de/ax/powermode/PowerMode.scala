@@ -71,7 +71,7 @@ class PowerMode
     with PersistentStateComponent[PowerMode] {
   type HeatupKey = (Option[KeyStroke], Long)
   val mediaPlayerExists = Try {
-    Class.forName("javafx.scene.media.MediaPlayer")
+    Class.forName("javax.sound.sampled.SourceDataLine")
   }
   var isSingleBamImagePerEvent: Boolean = false
   var hotkeyHeatup: Boolean = true

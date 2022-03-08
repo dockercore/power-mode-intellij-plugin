@@ -15,7 +15,7 @@
  */
 package de.ax.powermode.power.management
 
-import com.intellij.openapi.actionSystem.{DataConstants, DataContext, PlatformDataKeys}
+import com.intellij.openapi.actionSystem.{DataConstants, DataContext, PlatformCoreDataKeys, PlatformDataKeys}
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.{EditorFactoryAdapter, EditorFactoryEvent}
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -59,7 +59,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
       val maybeProject: Seq[Project] = Seq(ForceTry {
         dataContext.getData(DataConstants.PROJECT)
       }, ForceTry {
-        dataContext.getData(PlatformDataKeys.PROJECT_CONTEXT)
+        dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
       }).toStream.flatMap(o =>
         o.toOption.flatMap(Option(_)).map(_.asInstanceOf[Project]))
       maybeProject.headOption.foreach(p => {

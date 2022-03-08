@@ -291,12 +291,12 @@ class ElementOfPowerContainer(editor: Editor)
 
   def componentResized(e: ComponentEvent) {
     setBounds(getMyBounds)
-    logger.debug("Resized")
+    logger.trace("Resized")
   }
 
   def componentMoved(e: ComponentEvent) {
     setBounds(getMyBounds)
-    logger.debug("Moved")
+    logger.trace("Moved")
   }
 
   def getMyBounds: Rectangle = {
