@@ -26,6 +26,7 @@ import de.ax.powermode.{Power, PowerMode, Util}
 import java.awt._
 import javax.swing._
 import scala.collection.mutable
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -83,7 +84,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
             updateSound
             updateContainers
             try {
-              Thread.sleep(1000 / powerMode.frameRate)
+              Thread.sleep((1000 / powerMode.frameRate.toHertz) toInt)
             } catch {
               case ignored: InterruptedException => {}
             }

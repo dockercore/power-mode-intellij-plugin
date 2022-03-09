@@ -18,7 +18,12 @@ package de.ax.powermode
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.{ApplicationComponent, PersistentStateComponent, State, Storage}
+import com.intellij.openapi.components.{
+  ApplicationComponent,
+  PersistentStateComponent,
+  State,
+  Storage
+}
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.util.xmlb.XmlSerializerUtil
@@ -26,6 +31,16 @@ import de.ax.powermode.power.color.ColorEdges
 import de.ax.powermode.power.management.ElementOfPowerContainerManager
 import org.apache.log4j._
 import org.jetbrains.annotations.Nullable
+import squants.Dimensionless
+import squants.DimensionlessConversions.{DimensionlessConversions, each}
+import squants.time.Time._
+import squants.time.Frequency._
+import squants.time.TimeConversions._
+import squants.time.FrequencyConversions._
+import squants.MetricSystem._
+import squants.time.{Frequency, Time, TimeUnit}
+
+import scala.language.postfixOps
 
 import java.awt.event.InputEvent
 import java.io.File
@@ -69,36 +84,38 @@ object PowerMode {
 class PowerMode
     extends ApplicationComponent
     with PersistentStateComponent[PowerMode] {
-  type HeatupKey = (Option[KeyStroke], Long)
+  type Timestamp = Time
+  type HeatupKey = (Option[KeyStroke], Timestamp)
   val mediaPlayerExists = Try {
     Class.forName("javax.sound.sampled.SourceDataLine")
   }
   var isSingleBamImagePerEvent: Boolean = false
   var hotkeyHeatup: Boolean = true
-  var bamLife: Long = 1000
+  var bamLife: Time = 1000 milliseconds
   var soundsFolder = Option.empty[File]
   var gravityFactor: Double = 21.21
   var sparkVelocityFactor: Double = 4.36
   var sparkSize = 3
   var sparksEnabled = true
-  var frameRate: Int = 30
-  var maxFlameSize = 100
-  var maxFlameLife = 2000
-  var heatupTime = 10000
+  var frameRate: Frequency = 30 hertz
+  var maxFlameSize: Int = 100
+  var maxFlameLife: Time = 2000 milliseconds
+  var heatupTimeMillis: Time = 10000 milliseconds
   var lastKeys = List.empty[HeatupKey]
-  var keyStrokesPerMinute = 300
+  var keyStrokesPerMinute: Frequency = 300 / 1.minutes
   var heatupFactor = 1.0
   var sparkLife = 3000
   var sparkCount = 10
-  var shakeRange = 4
+  var shakeRange: Int = 4
   var flamesEnabled: Boolean = true
-  var maybeElementOfPowerContainerManager =
-    Option.empty[ElementOfPowerContainerManager]
+  var maybeElementOfPowerContainerManager
+    : Option[ElementOfPowerContainerManager] =
+    Option.empty
   var isBamEnabled: Boolean = true
-  var isSoundsPlaying = false
-  var powerIndicatorEnabled = true
+  var isSoundsPlaying: Boolean = false
+  var powerIndicatorEnabled: Boolean = true
   var caretAction: Boolean = false
-  var hotkeyWeight: Double = keyStrokesPerMinute * 0.05
+  var hotkeyWeight: Dimensionless = keyStrokesPerMinute * (3 seconds)
   var redFrom: Int = 0
   var redTo: Int = 255
   var greenFrom: Int = 0
@@ -129,16 +146,16 @@ class PowerMode
     if (!_isCustomBamImages) Some(new File("bam")) else customBamImageFolder
   }
 
-  def getFrameRate() = frameRate
+  def getFrameRate(): Int = frameRate.toHertz.toInt
 
-  def setFrameRate(f: Int) {
-    frameRate = f
+  def setFrameRateHertz(f: Int) {
+    frameRate = f hertz
   }
 
   def increaseHeatup(
       dataContext: Option[DataContext] = Option.empty[DataContext],
       keyStroke: Option[KeyStroke] = Option.empty[KeyStroke]): Unit = {
-    val ct = System.currentTimeMillis()
+    val ct = System.currentTimeMillis().milliseconds
     lastKeys = (keyStroke, ct) :: filterLastKeys(ct)
     dataContext.foreach(dc =>
       maybeElementOfPowerContainerManager.foreach(_.showIndicator(dc)))
@@ -146,75 +163,51 @@ class PowerMode
   }
 
   def reduceHeatup: Unit = {
-    val ct = System.currentTimeMillis()
+    val ct = System.currentTimeMillis().milliseconds
     lastKeys = filterLastKeys(ct)
-    //    maybeElementOfPowerContainerManager.map(_.showIndicator)
   }
 
-  private def filterLastKeys(ct: Long): List[HeatupKey] = {
-    lastKeys.filter(_._2 >= ct - heatupTime)
+  private def filterLastKeys(currentTime: Time): List[HeatupKey] = {
+    lastKeys.filter(_._2 >= currentTime - heatupTimeMillis)
   }
 
-  def rawValueFactor = {
+  def rawValueFactor: Double = {
     val base = heatupFactor +
-      ((1 - heatupFactor) * rawTimeFactor)
-    val elems = (base - heatupThreshold) / (1 - heatupThreshold)
-    elems
+      ((1 - heatupFactor) * rawTimeFactorFromKeyStrokes)
+    (base - heatupThreshold) / (1 - heatupThreshold)
   }
 
-  def rawTimeFactor: Double = {
+  def rawTimeFactorFromKeyStrokes: Double = {
     val tf = Try {
-      if (heatupTime < 1000) {
-        1
+      if (heatupTimeMillis < 1.seconds) {
+        1 ea
       } else {
-        val d = heatupTime.toDouble / (60000.0 / keyStrokesPerMinute)
-        val keysWorth = lastKeys.map {
+        val MaxKeystrokesOverHeatupTime
+          : Dimensionless = heatupTimeMillis * keyStrokesPerMinute
+        val vals: Seq[Dimensionless] = lastKeys.map {
           case (Some(ks), _) =>
             val size = Seq(InputEvent.CTRL_DOWN_MASK,
                            InputEvent.ALT_DOWN_MASK,
-                           InputEvent.SHIFT_DOWN_MASK).count(m =>
-              (ks.getModifiers & m) > 0)
-            val res = size * hotkeyWeight
-            res
-          case _ => 1
-        }.sum
-        keysWorth / d
+                           InputEvent.SHIFT_DOWN_MASK)
+              .count(m => (ks.getModifiers & m) > 0)
+            (size * hotkeyWeight)
+          case _ => 1.ea
+        }
+
+        val keystrokesOverHeatupTime: Dimensionless = vals.foldLeft(0.ea)(_ + _)
+        val res = (keystrokesOverHeatupTime / MaxKeystrokesOverHeatupTime).ea
+        res
       }
-    }.getOrElse(0.0)
-    tf
+    }.getOrElse(0 ea)
+    tf.toEach
   }
 
   def valueFactor: Double = {
-    val base = heatupFactor +
-      ((1 - heatupFactor) * timeFactor)
-    val elems = (base - heatupThreshold) / (1 - heatupThreshold)
-
-    val max = Seq(elems, 0.0).max
-    assert(max <= 1)
-    assert(max >= 0)
-    max
+    math.min(math.max(rawValueFactor, 0), 1)
   }
 
   def timeFactor: Double = {
-    val tf = Try {
-      if (heatupTime < 1000) {
-        1
-      } else {
-        val d = heatupTime.toDouble / (60000.0 / keyStrokesPerMinute)
-        val keysWorth = lastKeys.map {
-          case (Some(ks), _) =>
-            val size = Seq(InputEvent.CTRL_DOWN_MASK,
-                           InputEvent.ALT_DOWN_MASK,
-                           InputEvent.SHIFT_DOWN_MASK).count(m =>
-              (ks.getModifiers & m) > 0)
-            val res = size * hotkeyWeight
-            res
-          case _ => 1
-        }.sum
-        math.min(keysWorth, d) / d
-      }
-    }.getOrElse(0.0)
-    tf
+    math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1)
   }
 
   override def initComponent: Unit = {
@@ -289,24 +282,24 @@ class PowerMode
     this.shakeRange = shakeRange
   }
 
-  def getHeatup = (heatupFactor * 100).toInt
+  def getHeatup: Int = (heatupFactor * 100).toInt
 
   def setHeatup(heatup: Int) {
     this.heatupFactor = heatup / 100.0
   }
 
-  def getHeatupTime = heatupTime
+  def getHeatupTime: Int = heatupTimeMillis.toMilliseconds.toInt
 
   def setHeatupTime(heatupTime: Int) {
-    this.heatupTime = math.max(0, heatupTime)
+    this.heatupTimeMillis = math.max(0, heatupTime) milliseconds
   }
 
   def getFlameLife: Int = {
-    return maxFlameLife
+     maxFlameLife.toMilliseconds.toInt
   }
 
   def setFlameLife(flameLife: Int): Unit = {
-    maxFlameLife = flameLife
+    maxFlameLife = flameLife.milliseconds
   }
 
   def getmaxFlameSize: Int = {
@@ -318,11 +311,11 @@ class PowerMode
   }
 
   def getKeyStrokesPerMinute: Int = {
-    return keyStrokesPerMinute
+     (keyStrokesPerMinute* 1.minutes).toEach.toInt
   }
 
   def setKeyStrokesPerMinute(keyStrokesPerMinute: Int) {
-    this.keyStrokesPerMinute = keyStrokesPerMinute
+    this.keyStrokesPerMinute = keyStrokesPerMinute/1.minutes
   }
 
   def isFlamesEnabled: Boolean = {
@@ -443,13 +436,13 @@ class PowerMode
     this.isSoundsPlaying = isSoundsPlaying
   }
 
-  def getBamLife = bamLife
+  def getBamLife = bamLife.toMilliseconds
 
   def setBamLife(l: Long) {
-    bamLife = l
+    bamLife = l.milliseconds
   }
 
-  def getIsBamEnabled = isBamEnabled
+  def getIsBamEnabled: Boolean = isBamEnabled
 
   def setIsBamEnabled(b: Boolean) {
     isBamEnabled = b

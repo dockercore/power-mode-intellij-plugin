@@ -22,6 +22,16 @@ import de.ax.powermode.power.ElementOfPower
 import de.ax.powermode.power.element.{PowerBam, PowerFlame, PowerIndicator, PowerSpark}
 import de.ax.powermode.{Power, Util}
 import powermode.PowerColor
+import squants.Dimensionless
+import squants.DimensionlessConversions.{DimensionlessConversions, each}
+import squants.time.Time._
+import squants.time.Frequency._
+import squants.time.TimeConversions._
+import squants.time.FrequencyConversions._
+import squants.MetricSystem._
+import squants.time.{Frequency, Time, TimeUnit}
+
+import scala.language.postfixOps
 
 import java.awt.event.{ComponentEvent, ComponentListener}
 import java.awt.{Graphics, Point, Rectangle}
@@ -134,9 +144,12 @@ class ElementOfPowerContainer(editor: Editor)
   }
 
   def updateElementsOfPower() {
-    var delta = System.currentTimeMillis() - lastUpdate
-    if (delta > (1000.0 / powerMode.frameRate) * 2)
-      delta = 16
+    var delta = (System.currentTimeMillis() - lastUpdate)
+    val value = (1000.0/powerMode.frameRate.toHertz)
+    if (delta > value * 2) {
+      //smoothen movement when frame rate drops
+      delta = 16 
+    }
     lastUpdate = System.currentTimeMillis()
     val db: Double = 1000.0 / 16
     if (elementsOfPower.nonEmpty) {
@@ -192,14 +205,14 @@ class ElementOfPowerContainer(editor: Editor)
       math.max(0, y),
       dim,
       dim,
-      powerMode.bamLife * powerMode.valueFactor toLong), getScrollPosition)
+      (powerMode.bamLife * powerMode.valueFactor).toMilliseconds.toLong), getScrollPosition)
   }
 
   def addFlames(point: Point): Unit = {
     val base = 0.3
     val wh = (powerMode.maxFlameSize * base +
       ((math.random * powerMode.maxFlameSize * (1 - base)) * powerMode.valueFactor)).toInt
-    val initLife = (powerMode.maxFlameLife * powerMode.valueFactor).toInt
+    val initLife = (powerMode.maxFlameLife * powerMode.valueFactor).toMilliseconds.toInt
     if (initLife > 100) {
       elementsOfPower :+= (PowerFlame(point.x + 5,
                                       point.y - 1,
