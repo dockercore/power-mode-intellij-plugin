@@ -295,7 +295,7 @@ class PowerMode
   }
 
   def getFlameLife: Int = {
-     maxFlameLife.toMilliseconds.toInt
+    maxFlameLife.toMilliseconds.toInt
   }
 
   def setFlameLife(flameLife: Int): Unit = {
@@ -311,11 +311,11 @@ class PowerMode
   }
 
   def getKeyStrokesPerMinute: Int = {
-     (keyStrokesPerMinute* 1.minutes).toEach.toInt
+    (keyStrokesPerMinute * 1.minutes).toEach.toInt
   }
 
   def setKeyStrokesPerMinute(keyStrokesPerMinute: Int) {
-    this.keyStrokesPerMinute = keyStrokesPerMinute/1.minutes
+    this.keyStrokesPerMinute = keyStrokesPerMinute / 1.minutes
   }
 
   def isFlamesEnabled: Boolean = {

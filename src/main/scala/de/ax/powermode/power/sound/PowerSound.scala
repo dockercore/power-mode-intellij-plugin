@@ -74,7 +74,8 @@ class PowerSound(folder: => Option[File], valueFactor: => Double)
           val mediaPlayer = new de.ax.powermode.power.sound.MediaPlayer(f)
           mediaPlayer.onError(() => {
             logger.debug("resetting")
-            ResetPlaying.run() })
+            ResetPlaying.run()
+          })
           mediaPlayer.setVolume(valueFactor.toFloat)
           mediaPlayer.play()
           mediaPlayer

@@ -19,7 +19,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event._
 import com.intellij.openapi.editor.{Editor, ScrollingModel}
 import de.ax.powermode.power.ElementOfPower
-import de.ax.powermode.power.element.{PowerBam, PowerFlame, PowerIndicator, PowerSpark}
+import de.ax.powermode.power.element.{
+  PowerBam,
+  PowerFlame,
+  PowerIndicator,
+  PowerSpark
+}
 import de.ax.powermode.{Power, Util}
 import powermode.PowerColor
 import squants.Dimensionless
@@ -145,10 +150,10 @@ class ElementOfPowerContainer(editor: Editor)
 
   def updateElementsOfPower() {
     var delta = (System.currentTimeMillis() - lastUpdate)
-    val value = (1000.0/powerMode.frameRate.toHertz)
+    val value = (1000.0 / powerMode.frameRate.toHertz)
     if (delta > value * 2) {
       //smoothen movement when frame rate drops
-      delta = 16 
+      delta = 16
     }
     lastUpdate = System.currentTimeMillis()
     val db: Double = 1000.0 / 16
@@ -212,7 +217,8 @@ class ElementOfPowerContainer(editor: Editor)
     val base = 0.3
     val wh = (powerMode.maxFlameSize * base +
       ((math.random * powerMode.maxFlameSize * (1 - base)) * powerMode.valueFactor)).toInt
-    val initLife = (powerMode.maxFlameLife * powerMode.valueFactor).toMilliseconds.toInt
+    val initLife =
+      (powerMode.maxFlameLife * powerMode.valueFactor).toMilliseconds.toInt
     if (initLife > 100) {
       elementsOfPower :+= (PowerFlame(point.x + 5,
                                       point.y - 1,

@@ -50,11 +50,9 @@ class MediaPlayer(file: File) extends AutoCloseable {
       val volRange = volControl
         .getMaximum() - volControl.getMinimum()
       val newGain: Double =
-        Math.min(
-          Math.max(
-            volControl.getMinimum() + ((gain) * volRange),
-            volControl.getMinimum()),
-          volControl.getMaximum() * 0.99999999)
+        Math.min(Math.max(volControl.getMinimum() + ((gain) * volRange),
+                          volControl.getMinimum()),
+                 volControl.getMaximum() * 0.99999999)
 
       logger.debug(s"setting volume ${gain}factor applied to ${volControl
         .getMinimum()} - ${volControl.getMaximum()}  => ${newGain}")

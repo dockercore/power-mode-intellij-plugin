@@ -15,9 +15,17 @@
  */
 package de.ax.powermode.power.management
 
-import com.intellij.openapi.actionSystem.{DataConstants, DataContext, PlatformCoreDataKeys, PlatformDataKeys}
+import com.intellij.openapi.actionSystem.{
+  DataConstants,
+  DataContext,
+  PlatformCoreDataKeys,
+  PlatformDataKeys
+}
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.event.{EditorFactoryAdapter, EditorFactoryEvent}
+import com.intellij.openapi.editor.event.{
+  EditorFactoryAdapter,
+  EditorFactoryEvent
+}
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import de.ax.powermode.power.sound.PowerSound
