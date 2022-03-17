@@ -58,7 +58,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
   private lazy val triedSound: Try[PowerSound] =
     powerMode.mediaPlayerExists.flatMap { _ =>
       Try {
-        new PowerSound(powerMode.soundsFolder, powerMode.valueFactor)
+        new PowerSound(powerMode.soundsFolder, powerMode.valueFactor, (powerMode.minVolume,powerMode.maxVolume))
       }
     }
   lazy val sound = triedSound

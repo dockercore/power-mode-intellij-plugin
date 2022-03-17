@@ -3,6 +3,7 @@ package de.ax.powermode.power.element
 import com.intellij.openapi.editor.Editor
 import de.ax.powermode.power.ElementOfPower
 import de.ax.powermode.{PowerMode, Util}
+import squants.DimensionlessConversions.DimensionlessConversions
 
 import java.awt._
 import java.awt.image.BufferedImage
@@ -48,7 +49,7 @@ object PowerIndicator {
       }
     }
 
-    if (math.random < Seq(0.01, 0.2 * PowerMode.getInstance.valueFactor).max) {
+    if (math.random*100.percent < Seq(1.percent, 0.2 * PowerMode.getInstance.valueFactor).max) {
       val grand = nextGrand(lastGrand)
       lastGrand = Some(grand)
       grand

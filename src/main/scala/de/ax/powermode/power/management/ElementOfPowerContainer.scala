@@ -19,16 +19,11 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event._
 import com.intellij.openapi.editor.{Editor, ScrollingModel}
 import de.ax.powermode.power.ElementOfPower
-import de.ax.powermode.power.element.{
-  PowerBam,
-  PowerFlame,
-  PowerIndicator,
-  PowerSpark
-}
+import de.ax.powermode.power.element.{PowerBam, PowerFlame, PowerIndicator, PowerSpark}
 import de.ax.powermode.{Power, Util}
 import powermode.PowerColor
 import squants.Dimensionless
-import squants.DimensionlessConversions.{DimensionlessConversions, each}
+import squants.DimensionlessConversions.{DimensionlessConversions, dimensionlessToDouble, each}
 import squants.time.Time._
 import squants.time.Frequency._
 import squants.time.TimeConversions._
@@ -37,7 +32,6 @@ import squants.MetricSystem._
 import squants.time.{Frequency, Time, TimeUnit}
 
 import scala.language.postfixOps
-
 import java.awt.event.{ComponentEvent, ComponentListener}
 import java.awt.{Graphics, Point, Rectangle}
 import java.util.TimerTask

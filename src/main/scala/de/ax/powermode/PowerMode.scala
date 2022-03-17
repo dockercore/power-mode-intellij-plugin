@@ -18,15 +18,11 @@ package de.ax.powermode
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.{
-  ApplicationComponent,
-  PersistentStateComponent,
-  State,
-  Storage
-}
+import com.intellij.openapi.components.{ApplicationComponent, PersistentStateComponent, State, Storage}
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.util.xmlb.XmlSerializerUtil
+import de.ax.powermode.PowerMode.logger
 import de.ax.powermode.power.color.ColorEdges
 import de.ax.powermode.power.management.ElementOfPowerContainerManager
 import org.apache.log4j._
@@ -41,7 +37,6 @@ import squants.MetricSystem._
 import squants.time.{Frequency, Time, TimeUnit}
 
 import scala.language.postfixOps
-
 import java.awt.event.InputEvent
 import java.io.File
 import javax.swing.KeyStroke
@@ -93,6 +88,26 @@ class PowerMode
   var hotkeyHeatup: Boolean = true
   var bamLife: Time = 1000 milliseconds
   var soundsFolder = Option.empty[File]
+   var minVolume: Dimensionless = 10.percent
+  var maxVolume: Dimensionless = 100.percent
+
+  def getMinVolume: Int = minVolume.toPercent.toInt
+
+  def setMinVolume(value: Int): Unit = {
+    minVolume = value.percent
+    logger.info(s"Setting min volume ${minVolume}")
+    maxVolume = Seq(minVolume, maxVolume).max
+  }
+
+
+  def getMaxVolume: Int = maxVolume.toPercent.toInt
+
+  def setMaxVolume(value: Int): Unit = {
+    maxVolume = value.percent
+    logger.info(s"Setting max volume ${maxVolume}")
+    minVolume = Seq(minVolume, maxVolume).min
+  }
+
   var gravityFactor: Double = 21.21
   var sparkVelocityFactor: Double = 4.36
   var sparkSize = 3
@@ -202,12 +217,12 @@ class PowerMode
     tf.toEach
   }
 
-  def valueFactor: Double = {
-    math.min(math.max(rawValueFactor, 0), 1)
+  def valueFactor: Dimensionless = {
+    math.min(math.max(rawValueFactor, 0), 1)*100.percent
   }
 
-  def timeFactor: Double = {
-    math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1)
+  def timeFactor: Dimensionless = {
+    math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1)  *100.percent
   }
 
   override def initComponent: Unit = {

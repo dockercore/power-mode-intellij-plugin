@@ -7,6 +7,8 @@ import javazoom.jl.player.advanced.{
   PlaybackEvent,
   PlaybackListener
 }
+import squants.Dimensionless
+import squants.DimensionlessConversions.dimensionlessToDouble
 
 import scala.util.Using
 import java.io.{
@@ -24,7 +26,8 @@ object MediaPlayer {
 
 }
 
-class MediaPlayer(file: File) extends AutoCloseable {
+class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
+    extends AutoCloseable {
   def logger = PowerMode.logger
   import de.ax.powermode.power.sound.MediaPlayer._
   val stream = new BufferedInputStream(new FileInputStream(file))
@@ -41,21 +44,32 @@ class MediaPlayer(file: File) extends AutoCloseable {
   var playThread = Option.empty[Thread]
   player.setPlayBackListener(listener)
 
-  def setVolume(gain: Float) = {
+  def setVolume(rawGain: Dimensionless) = {
     logger.trace("setting volume ")
     val control: Option[FloatControl] = Option(soundAudioDevice.source)
       .flatMap(x => Option(x.getControl(FloatControl.Type.MASTER_GAIN)))
       .map(_.asInstanceOf[FloatControl])
     control.foreach { volControl =>
+      val range: (Dimensionless, Dimensionless) = volumeRange
       val volRange = volControl
         .getMaximum() - volControl.getMinimum()
+
+      val gain: Dimensionless =
+        if (range._2 < rawGain) {
+          range._2
+        } else if (rawGain < range._1) {
+          range._1
+        } else {
+          rawGain
+        }
       val newGain: Double =
-        Math.min(Math.max(volControl.getMinimum() + ((gain) * volRange),
+        Math.min(Math.max(volControl.getMinimum() + (gain.toDouble * volRange),
                           volControl.getMinimum()),
                  volControl.getMaximum() * 0.99999999)
 
-      logger.debug(s"setting volume ${gain}factor applied to ${volControl
-        .getMinimum()} - ${volControl.getMaximum()}  => ${newGain}")
+      logger.trace(
+        s"setting volume ${rawGain}factor. was limited to ${gain} applied to ${volControl
+          .getMinimum()} - ${volControl.getMaximum()}  => ${newGain}")
       logger.trace("Was: " + volControl.getValue() + " Will be: " + newGain);
       volControl.setValue(newGain.toFloat);
     }
