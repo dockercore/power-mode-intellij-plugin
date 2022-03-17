@@ -7,7 +7,7 @@ import org.apache.log4j.Logger
 import squants.Dimensionless
 import squants.DimensionlessConversions.dimensionlessToDouble
 
-import scala.util.Using
+import scala.util.{Try, Using}
 import java.io.{BufferedInputStream, File, FileInputStream, FileOutputStream, InputStream}
 import javax.sound.sampled.{Control, FloatControl}
 
@@ -38,7 +38,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   def setVolume(rawGain: Dimensionless): Unit = {
     logger.trace("setting volume ")
     val control: Option[FloatControl] = Option(soundAudioDevice.source)
-      .flatMap(x => Option(x.getControl(FloatControl.Type.MASTER_GAIN)))
+      .flatMap(x => Try{x.getControl(FloatControl.Type.MASTER_GAIN)}.toOption)
       .map(_.asInstanceOf[FloatControl])
     control.foreach { volControl =>
       val range: (Dimensionless, Dimensionless) = volumeRange
@@ -62,7 +62,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
                           volControl.getMinimum()),
                  volControl.getMaximum() * 0.99999999)
 
-      logger.info(
+      logger.trace(
         s"setting volume ${rawGain}factor. was limited to ${gain} applied to ${volControl
           .getMinimum()} - ${volControl.getMaximum()}  => ${newGain}")
       logger.trace("Was: " + volControl.getValue() + " Will be: " + newGain);

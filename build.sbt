@@ -16,6 +16,7 @@ lazy val powerMode =
       libraryDependencies ++= Seq(
         "javazoom" % "jlayer" % "1.0.1",
         "org.typelevel"  %% "squants"  % "1.6.0",
+        "org.apache.commons" % "commons-math3" % "3.3", 
         "com.eclipsesource.minimal-json" % "minimal-json" % "0.9.5" withSources ()
       ),
       unmanagedJars in Compile += baseDirectory.value / "lib",

@@ -18,13 +18,19 @@ package de.ax.powermode
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.{ApplicationComponent, PersistentStateComponent, State, Storage}
+import com.intellij.openapi.components.{
+  ApplicationComponent,
+  PersistentStateComponent,
+  State,
+  Storage
+}
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.util.xmlb.XmlSerializerUtil
 import de.ax.powermode.PowerMode.logger
 import de.ax.powermode.power.color.ColorEdges
 import de.ax.powermode.power.management.ElementOfPowerContainerManager
+import org.apache.commons.math3.stat.regression.SimpleRegression
 import org.apache.log4j._
 import org.jetbrains.annotations.Nullable
 import squants.Dimensionless
@@ -88,7 +94,7 @@ class PowerMode
   var hotkeyHeatup: Boolean = true
   var bamLife: Time = 1000 milliseconds
   var soundsFolder = Option.empty[File]
-   var minVolume: Dimensionless = 10.percent
+  var minVolume: Dimensionless = 10.percent
   var maxVolume: Dimensionless = 100.percent
 
   def getMinVolume: Int = minVolume.toPercent.toInt
@@ -98,7 +104,6 @@ class PowerMode
     logger.info(s"Setting min volume ${minVolume}")
     maxVolume = Seq(minVolume, maxVolume).max
   }
-
 
   def getMaxVolume: Int = maxVolume.toPercent.toInt
 
@@ -177,16 +182,48 @@ class PowerMode
 
   }
 
+  var previousValues = List.empty[Double]
+
   def reduceHeatup: Unit = {
     val ct = System.currentTimeMillis().milliseconds
     lastKeys = filterLastKeys(ct)
+    adjustValueFactor
+  }
+
+  private def adjustValueFactor: Unit = {
+    if (previousValues.size > frameRate.toHertz) {
+      previousValues = previousValues.dropRight(1)
+    }
+    val unlimited = rawValueFactorUnlimited
+    val wouldValues = unlimited :: previousValues
+    val slope = if (wouldValues.size > 1) {
+      val s = new SimpleRegression()
+      wouldValues.zipWithIndex.foreach {
+        case (e, i) =>
+          s.addData(i, e)
+      }
+      s.getSlope
+    } else {
+      0
+    }
+    val maxSlope = 0.001
+    val maxSlopeValue = 0.0005
+    if (slope > maxSlope) {
+      rvf *= (1.0 + maxSlopeValue)
+    } else if (slope < -maxSlope) {
+      rvf *= (1.0 - maxSlopeValue)
+    } else {
+      rvf = unlimited
+    }
+    previousValues ::= rvf
   }
 
   private def filterLastKeys(currentTime: Time): List[HeatupKey] = {
     lastKeys.filter(_._2 >= currentTime - heatupTimeMillis)
   }
-
-  def rawValueFactor: Double = {
+  var rvf: Double = 0.0
+  def rawValueFactor: Double = { rvf }
+  def rawValueFactorUnlimited: Double = {
     val base = heatupFactor +
       ((1 - heatupFactor) * rawTimeFactorFromKeyStrokes)
     (base - heatupThreshold) / (1 - heatupThreshold)
@@ -218,11 +255,11 @@ class PowerMode
   }
 
   def valueFactor: Dimensionless = {
-    math.min(math.max(rawValueFactor, 0), 1)*100.percent
+    math.min(math.max(rawValueFactor, 0), 1) * 100.percent
   }
 
   def timeFactor: Dimensionless = {
-    math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1)  *100.percent
+    math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1) * 100.percent
   }
 
   override def initComponent: Unit = {
