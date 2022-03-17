@@ -237,11 +237,11 @@ class PowerMode
   }
 
   override def getComponentName: String = {
-    return "PowerModeII"
+    "PowerModeII"
   }
 
   def getState: PowerMode = {
-    return this
+    this
   }
 
   def loadState(state: PowerMode): Unit = {
@@ -303,7 +303,7 @@ class PowerMode
   }
 
   def getmaxFlameSize: Int = {
-    return maxFlameSize
+    maxFlameSize
   }
 
   def setmaxFlameSize(maxFlameSize: Int): Unit = {
@@ -319,7 +319,7 @@ class PowerMode
   }
 
   def isFlamesEnabled: Boolean = {
-    return flamesEnabled
+    flamesEnabled
   }
 
   def setFlamesEnabled(flamesEnabled: Boolean): Unit = {
@@ -327,7 +327,7 @@ class PowerMode
   }
 
   def isSparksEnabled: Boolean = {
-    return sparksEnabled
+    sparksEnabled
   }
 
   def setSparksEnabled(sparksEnabled: Boolean): Unit = {
@@ -335,7 +335,7 @@ class PowerMode
   }
 
   def getSparkSize: Int = {
-    return sparkSize
+    sparkSize
   }
 
   def setSparkSize(sparkSize: Int): Unit = {
@@ -364,7 +364,7 @@ class PowerMode
   }
 
   def getRedTo: Int = {
-    return redTo
+    redTo
   }
 
   def setRedTo(redTo: Int): Unit = {
@@ -373,7 +373,7 @@ class PowerMode
   }
 
   def getGreenTo: Int = {
-    return greenTo
+    greenTo
   }
 
   def setGreenTo(greenTo: Int): Unit = {
@@ -382,7 +382,7 @@ class PowerMode
   }
 
   def getGreenFrom: Int = {
-    return greenFrom
+    greenFrom
   }
 
   def setGreenFrom(gf: Int): Unit = {
@@ -391,7 +391,7 @@ class PowerMode
   }
 
   def getBlueTo: Int = {
-    return blueTo
+    blueTo
   }
 
   def setBlueTo(blueTo: Int): Unit = {
@@ -400,7 +400,7 @@ class PowerMode
   }
 
   def getBlueFrom: Int = {
-    return blueFrom
+    blueFrom
   }
 
   def setBlueFrom(bf: Int): Unit = {
@@ -409,7 +409,7 @@ class PowerMode
   }
 
   def getColorAlpha: Int = {
-    return colorAlpha
+    colorAlpha
   }
 
   def setColorAlpha(alpha: Int): Unit = {
@@ -458,7 +458,7 @@ class PowerMode
   }
 
   def getIsPowerIndicatorEnabled: Boolean = {
-    return powerIndicatorEnabled
+    powerIndicatorEnabled
   }
 
   def setIsPowerIndicatorEnabled(enabled: Boolean): Unit = {
