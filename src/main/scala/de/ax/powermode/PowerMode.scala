@@ -86,7 +86,7 @@ class PowerMode
     with PersistentStateComponent[PowerMode] {
   type Timestamp = Time
   type HeatupKey = (Option[KeyStroke], Timestamp)
-  val mediaPlayerExists = Try {
+  val mediaPlayerExists: Try[Class[_]] = Try {
     Class.forName("javax.sound.sampled.SourceDataLine")
   }
   var isSingleBamImagePerEvent: Boolean = false
@@ -131,24 +131,24 @@ class PowerMode
   private var enabled: Boolean = true
   private var shakeEnabled: Boolean = false
 
-  def isHotkeyHeatup = hotkeyHeatup
+  def isHotkeyHeatup: Boolean = hotkeyHeatup
 
   def setHotkeyHeatup(h: Boolean): Unit = {
     hotkeyHeatup = h
   }
 
-  def flameImageFolder = {
+  def flameImageFolder: Option[File] = {
     if (!_isCustomFlameImages) Some(new File("fire/animated/256"))
     else customFlameImageFolder
   }
 
-  def bamImageFolder = {
+  def bamImageFolder: Option[File] = {
     if (!_isCustomBamImages) Some(new File("bam")) else customBamImageFolder
   }
 
   def getFrameRate(): Int = frameRate.toHertz.toInt
 
-  def setFrameRateHertz(f: Int) {
+  def setFrameRateHertz(f: Int): Unit = {
     frameRate = f hertz
   }
 
@@ -217,7 +217,7 @@ class PowerMode
       new ElementOfPowerContainerManager)
     maybeElementOfPowerContainerManager.foreach(
       editorFactory.addEditorFactoryListener(_, new Disposable() {
-        def dispose {}
+        def dispose: Unit = {}
       }))
     val editorActionManager = EditorActionManager.getInstance
     EditorFactory
@@ -244,7 +244,7 @@ class PowerMode
     return this
   }
 
-  def loadState(state: PowerMode) {
+  def loadState(state: PowerMode): Unit = {
     XmlSerializerUtil.copyBean(state, this)
   }
 
@@ -252,7 +252,7 @@ class PowerMode
     enabled
   }
 
-  def setEnabled(enabled: Boolean) {
+  def setEnabled(enabled: Boolean): Unit = {
     this.enabled = enabled
   }
 
@@ -260,37 +260,37 @@ class PowerMode
     shakeEnabled
   }
 
-  def setShakeEnabled(shakeEnabled: Boolean) {
+  def setShakeEnabled(shakeEnabled: Boolean): Unit = {
     this.shakeEnabled = shakeEnabled
   }
 
-  def getSparkCount = sparkCount
+  def getSparkCount: Int = sparkCount
 
-  def setSparkCount(sparkCount: Int) {
+  def setSparkCount(sparkCount: Int): Unit = {
     this.sparkCount = sparkCount
   }
 
-  def getSparkLife = sparkLife
+  def getSparkLife: Int = sparkLife
 
-  def setSparkLife(sparkRange: Int) {
+  def setSparkLife(sparkRange: Int): Unit = {
     this.sparkLife = sparkRange
   }
 
-  def getShakeRange = shakeRange
+  def getShakeRange: Int = shakeRange
 
-  def setShakeRange(shakeRange: Int) {
+  def setShakeRange(shakeRange: Int): Unit = {
     this.shakeRange = shakeRange
   }
 
   def getHeatup: Int = (heatupFactor * 100).toInt
 
-  def setHeatup(heatup: Int) {
+  def setHeatup(heatup: Int): Unit = {
     this.heatupFactor = heatup / 100.0
   }
 
   def getHeatupTime: Int = heatupTimeMillis.toMilliseconds.toInt
 
-  def setHeatupTime(heatupTime: Int) {
+  def setHeatupTime(heatupTime: Int): Unit = {
     this.heatupTimeMillis = math.max(0, heatupTime) milliseconds
   }
 
@@ -314,7 +314,7 @@ class PowerMode
     (keyStrokesPerMinute * 1.minutes).toEach.toInt
   }
 
-  def setKeyStrokesPerMinute(keyStrokesPerMinute: Int) {
+  def setKeyStrokesPerMinute(keyStrokesPerMinute: Int): Unit = {
     this.keyStrokesPerMinute = keyStrokesPerMinute / 1.minutes
   }
 
@@ -322,7 +322,7 @@ class PowerMode
     return flamesEnabled
   }
 
-  def setFlamesEnabled(flamesEnabled: Boolean) {
+  def setFlamesEnabled(flamesEnabled: Boolean): Unit = {
     this.flamesEnabled = flamesEnabled
   }
 
@@ -330,7 +330,7 @@ class PowerMode
     return sparksEnabled
   }
 
-  def setSparksEnabled(sparksEnabled: Boolean) {
+  def setSparksEnabled(sparksEnabled: Boolean): Unit = {
     this.sparksEnabled = sparksEnabled
   }
 
@@ -338,19 +338,19 @@ class PowerMode
     return sparkSize
   }
 
-  def setSparkSize(sparkSize: Int) {
+  def setSparkSize(sparkSize: Int): Unit = {
     this.sparkSize = sparkSize
   }
 
   def getGravityFactor(): Double = gravityFactor
 
-  def setGravityFactor(f: Double) {
+  def setGravityFactor(f: Double): Unit = {
     gravityFactor = f
   }
 
   def getSparkVelocityFactor(): Double = sparkVelocityFactor
 
-  def setSparkVelocityFactor(f: Double) {
+  def setSparkVelocityFactor(f: Double): Unit = {
     sparkVelocityFactor = f
   }
 
@@ -358,7 +358,7 @@ class PowerMode
     redFrom
   }
 
-  def setRedFrom(redFrom: Int) {
+  def setRedFrom(redFrom: Int): Unit = {
     if (redFrom <= redTo)
       this.redFrom = redFrom
   }
@@ -367,7 +367,7 @@ class PowerMode
     return redTo
   }
 
-  def setRedTo(redTo: Int) {
+  def setRedTo(redTo: Int): Unit = {
     if (redTo >= redFrom)
       this.redTo = redTo
   }
@@ -376,7 +376,7 @@ class PowerMode
     return greenTo
   }
 
-  def setGreenTo(greenTo: Int) {
+  def setGreenTo(greenTo: Int): Unit = {
     if (greenTo >= greenFrom)
       this.greenTo = greenTo
   }
@@ -385,7 +385,7 @@ class PowerMode
     return greenFrom
   }
 
-  def setGreenFrom(gf: Int) {
+  def setGreenFrom(gf: Int): Unit = {
     if (gf <= greenTo)
       greenFrom = gf
   }
@@ -394,7 +394,7 @@ class PowerMode
     return blueTo
   }
 
-  def setBlueTo(blueTo: Int) {
+  def setBlueTo(blueTo: Int): Unit = {
     if (blueTo >= getBlueFrom)
       this.blueTo = blueTo
   }
@@ -403,7 +403,7 @@ class PowerMode
     return blueFrom
   }
 
-  def setBlueFrom(bf: Int) {
+  def setBlueFrom(bf: Int): Unit = {
     if (bf <= blueTo)
       blueFrom = bf
   }
@@ -412,13 +412,13 @@ class PowerMode
     return colorAlpha
   }
 
-  def setColorAlpha(alpha: Int) {
+  def setColorAlpha(alpha: Int): Unit = {
     colorAlpha = alpha
   }
 
-  def getSoundsFolder = soundsFolder.map(_.getAbsolutePath).getOrElse("")
+  def getSoundsFolder: String = soundsFolder.map(_.getAbsolutePath).getOrElse("")
 
-  def setSoundsFolder(file: String) {
+  def setSoundsFolder(file: String): Unit = {
     soundsFolder = Option(new File(file))
   }
 
@@ -426,25 +426,25 @@ class PowerMode
     caretAction
   }
 
-  def setIsCaretAction(isCaretAction: Boolean) {
+  def setIsCaretAction(isCaretAction: Boolean): Unit = {
     this.caretAction = isCaretAction
   }
 
-  def getIsSoundsPlaying = isSoundsPlaying
+  def getIsSoundsPlaying: Boolean = isSoundsPlaying
 
-  def setIsSoundsPlaying(isSoundsPlaying: Boolean) {
+  def setIsSoundsPlaying(isSoundsPlaying: Boolean): Unit = {
     this.isSoundsPlaying = isSoundsPlaying
   }
 
-  def getBamLife = bamLife.toMilliseconds
+  def getBamLife: Double = bamLife.toMilliseconds
 
-  def setBamLife(l: Long) {
+  def setBamLife(l: Long): Unit = {
     bamLife = l.milliseconds
   }
 
   def getIsBamEnabled: Boolean = isBamEnabled
 
-  def setIsBamEnabled(b: Boolean) {
+  def setIsBamEnabled(b: Boolean): Unit = {
     isBamEnabled = b
   }
 
@@ -452,7 +452,7 @@ class PowerMode
     (heatupThreshold * 100.0).toInt
   }
 
-  def setHeatupThreshold(t: Int) {
+  def setHeatupThreshold(t: Int): Unit = {
     heatupThreshold = t / 100.0
   }
 
@@ -460,37 +460,37 @@ class PowerMode
     return powerIndicatorEnabled
   }
 
-  def setIsPowerIndicatorEnabled(enabled: Boolean) {
+  def setIsPowerIndicatorEnabled(enabled: Boolean): Unit = {
     powerIndicatorEnabled = enabled
   }
 
-  def isCustomFlameImages = _isCustomFlameImages
+  def isCustomFlameImages: Boolean = _isCustomFlameImages
 
-  def setCustomFlameImages(s: Boolean) {
+  def setCustomFlameImages(s: Boolean): Unit = {
     _isCustomFlameImages = s
   }
 
-  def isCustomBamImages = _isCustomBamImages
+  def isCustomBamImages: Boolean = _isCustomBamImages
 
-  def setCustomBamImages(s: Boolean) {
+  def setCustomBamImages(s: Boolean): Unit = {
     _isCustomBamImages = s
   }
 
   def getCustomFlameImageFolder: String =
     customFlameImageFolder.map(_.getAbsolutePath).getOrElse("")
 
-  def setCustomFlameImageFolder(file: String) {
+  def setCustomFlameImageFolder(file: String): Unit = {
     customFlameImageFolder = Option(new File(file))
   }
 
-  def getCustomBamImageFolder =
+  def getCustomBamImageFolder: String =
     customBamImageFolder.map(_.getAbsolutePath).getOrElse("")
 
-  def setCustomBamImageFolder(file: String) {
+  def setCustomBamImageFolder(file: String): Unit = {
     customBamImageFolder = Option(new File(file))
   }
 
-  def getIsSingleBamImagePerEvent() = {
+  def getIsSingleBamImagePerEvent(): Boolean = {
     isSingleBamImagePerEvent
   }
 
