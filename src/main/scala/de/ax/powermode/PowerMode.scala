@@ -416,7 +416,8 @@ class PowerMode
     colorAlpha = alpha
   }
 
-  def getSoundsFolder: String = soundsFolder.map(_.getAbsolutePath).getOrElse("")
+  def getSoundsFolder: String =
+    soundsFolder.map(_.getAbsolutePath).getOrElse("")
 
   def setSoundsFolder(file: String): Unit = {
     soundsFolder = Option(new File(file))
