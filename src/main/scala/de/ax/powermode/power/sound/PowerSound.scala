@@ -10,7 +10,9 @@ import scala.language.postfixOps
 /**
   * Created by nyxos on 03.10.16.
   */
-class PowerSound(folder: => Option[File], valueFactor: => Dimensionless,volumeRange: => (Dimensionless, Dimensionless))
+class PowerSound(folder: => Option[File],
+                 valueFactor: => Dimensionless,
+                 volumeRange: => (Dimensionless, Dimensionless))
     extends Power {
   def next(): Unit = {
     this.synchronized {
@@ -40,6 +42,7 @@ class PowerSound(folder: => Option[File], valueFactor: => Dimensionless,volumeRa
   private def doStop(): Unit = {
     this.synchronized {
       mediaPlayer.foreach(_.stop())
+      mediaPlayer = Option.empty
       playing = false
     }
   }
@@ -72,7 +75,8 @@ class PowerSound(folder: => Option[File], valueFactor: => Dimensionless,volumeRa
       try {
         playing = true
         mediaPlayer = Some {
-          val mediaPlayer = new de.ax.powermode.power.sound.MediaPlayer(f,volumeRange)
+          val mediaPlayer =
+            new de.ax.powermode.power.sound.MediaPlayer(f, volumeRange)
           mediaPlayer.onError(() => {
             logger.debug("resetting")
             ResetPlaying.run()
