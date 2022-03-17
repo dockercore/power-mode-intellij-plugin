@@ -2,13 +2,23 @@ package de.ax.powermode.power.sound
 
 import de.ax.powermode.PowerMode
 import javazoom.jl.player.{FactoryRegistry, HackyJavaSoundAudioDevice}
-import javazoom.jl.player.advanced.{AdvancedPlayer, PlaybackEvent, PlaybackListener}
+import javazoom.jl.player.advanced.{
+  AdvancedPlayer,
+  PlaybackEvent,
+  PlaybackListener
+}
 import org.apache.log4j.Logger
 import squants.Dimensionless
 import squants.DimensionlessConversions.dimensionlessToDouble
 
 import scala.util.{Try, Using}
-import java.io.{BufferedInputStream, File, FileInputStream, FileOutputStream, InputStream}
+import java.io.{
+  BufferedInputStream,
+  File,
+  FileInputStream,
+  FileOutputStream,
+  InputStream
+}
 import javax.sound.sampled.{Control, FloatControl}
 
 object MediaPlayer {
@@ -19,9 +29,11 @@ object MediaPlayer {
 
 class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
     extends AutoCloseable {
-  def logger: Logger = PowerMode.logger 
-  val stream: BufferedInputStream = new BufferedInputStream(new FileInputStream(file))
-  val soundAudioDevice: HackyJavaSoundAudioDevice =MediaPlayer.getSoundAudioDevice
+  def logger: Logger = PowerMode.logger
+  val stream: BufferedInputStream = new BufferedInputStream(
+    new FileInputStream(file))
+  val soundAudioDevice: HackyJavaSoundAudioDevice =
+    MediaPlayer.getSoundAudioDevice
   val player: AdvancedPlayer = new AdvancedPlayer(stream, soundAudioDevice)
   val listener: PlaybackListener = new PlaybackListener {
     override def playbackStarted(evt: PlaybackEvent): Unit = {
@@ -38,7 +50,10 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   def setVolume(rawGain: Dimensionless): Unit = {
     logger.trace("setting volume ")
     val control: Option[FloatControl] = Option(soundAudioDevice.source)
-      .flatMap(x => Try{x.getControl(FloatControl.Type.MASTER_GAIN)}.toOption)
+      .flatMap(sourceDataLine =>
+        Try {
+          sourceDataLine.getControl(FloatControl.Type.MASTER_GAIN)
+        }.toOption)
       .map(_.asInstanceOf[FloatControl])
     control.foreach { volControl =>
       val range: (Dimensionless, Dimensionless) = volumeRange
@@ -83,7 +98,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
               notifyHandlers()
               throw e
           } finally {
-            playThread = None 
+            playThread = None
           }
         }
       }))
@@ -98,7 +113,9 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   }
 
   def stop(): Unit = {
-    player.stop()
+    if (player != null) {
+      player.stop()
+    }
   }
   var handlers = List.empty[() => Unit]
   def onError(fn: () => Unit): Unit = {
