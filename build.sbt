@@ -5,7 +5,7 @@ lazy val powerMode =
     .in(file("."))
     .enablePlugins(SbtIdeaPlugin)
     .settings(
-      version := "100.001",
+      version := "101.101",
       scalaVersion := "2.13.2",
       ThisBuild / intellijPluginName := "Power Mode II",
       ThisBuild / intellijBuild := "221.4906.8",
