@@ -115,11 +115,11 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   def stop(): Unit = {
     if (player != null) {
       try {
-      player.stop()
+        player.stop()
       } catch {
         case e: Exception =>
-        logger.debug("error stopping",e)
-          // ignore
+          logger.debug("error stopping", e)
+        // ignore
       }
     }
   }
