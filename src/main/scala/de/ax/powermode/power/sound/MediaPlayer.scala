@@ -2,37 +2,28 @@ package de.ax.powermode.power.sound
 
 import de.ax.powermode.PowerMode
 import javazoom.jl.player.{FactoryRegistry, HackyJavaSoundAudioDevice}
-import javazoom.jl.player.advanced.{
-  AdvancedPlayer,
-  PlaybackEvent,
-  PlaybackListener
-}
+import javazoom.jl.player.advanced.{AdvancedPlayer, PlaybackEvent, PlaybackListener}
+import org.apache.log4j.Logger
 import squants.Dimensionless
 import squants.DimensionlessConversions.dimensionlessToDouble
 
 import scala.util.Using
-import java.io.{
-  BufferedInputStream,
-  File,
-  FileInputStream,
-  FileOutputStream,
-  InputStream
-}
+import java.io.{BufferedInputStream, File, FileInputStream, FileOutputStream, InputStream}
 import javax.sound.sampled.{Control, FloatControl}
 
 object MediaPlayer {
-  lazy val soundAudioDevice =
+  def getSoundAudioDevice =
     new HackyJavaSoundAudioDevice
 
 }
 
 class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
     extends AutoCloseable {
-  def logger = PowerMode.logger
-  import de.ax.powermode.power.sound.MediaPlayer._
-  val stream = new BufferedInputStream(new FileInputStream(file))
-  val player = new AdvancedPlayer(stream, soundAudioDevice)
-  val listener = new PlaybackListener {
+  def logger: Logger = PowerMode.logger 
+  val stream: BufferedInputStream = new BufferedInputStream(new FileInputStream(file))
+  val soundAudioDevice: HackyJavaSoundAudioDevice =MediaPlayer.getSoundAudioDevice
+  val player: AdvancedPlayer = new AdvancedPlayer(stream, soundAudioDevice)
+  val listener: PlaybackListener = new PlaybackListener {
     override def playbackStarted(evt: PlaybackEvent): Unit = {
       logger.debug("playbackStarted")
     }
@@ -44,7 +35,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   var playThread = Option.empty[Thread]
   player.setPlayBackListener(listener)
 
-  def setVolume(rawGain: Dimensionless) = {
+  def setVolume(rawGain: Dimensionless): Unit = {
     logger.trace("setting volume ")
     val control: Option[FloatControl] = Option(soundAudioDevice.source)
       .flatMap(x => Option(x.getControl(FloatControl.Type.MASTER_GAIN)))
@@ -62,12 +53,16 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
         } else {
           rawGain
         }
+
+      // use log scale to have a smoother transition at higer volume level
+      // slight higher volume changes are much harsher compared to the same amount of low volume change otherwise.
+      val logGain: Double = math.log10(1 + gain.toDouble * 9)
       val newGain: Double =
-        Math.min(Math.max(volControl.getMinimum() + (gain.toDouble * volRange),
+        Math.min(Math.max(volControl.getMinimum() + (logGain * volRange),
                           volControl.getMinimum()),
                  volControl.getMaximum() * 0.99999999)
 
-      logger.trace(
+      logger.info(
         s"setting volume ${rawGain}factor. was limited to ${gain} applied to ${volControl
           .getMinimum()} - ${volControl.getMaximum()}  => ${newGain}")
       logger.trace("Was: " + volControl.getValue() + " Will be: " + newGain);
@@ -84,8 +79,11 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
             player.play()
           } catch {
             case e =>
+              logger.error("playback error", e)
               notifyHandlers()
               throw e
+          } finally {
+            playThread = None 
           }
         }
       }))
@@ -95,7 +93,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
     }
   }
 
-  private def notifyHandlers() = {
+  private def notifyHandlers(): Unit = {
     handlers.foreach(_.apply())
   }
 

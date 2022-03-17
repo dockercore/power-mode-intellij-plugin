@@ -23,7 +23,7 @@ class PowerSound(folder: => Option[File], valueFactor: => Dimensionless,volumeRa
     override def run(): Unit = playing = false
   }
 
-  def files =
+  def files: Array[File] =
     folder
       .flatMap(f => Option(f.listFiles()))
       .getOrElse(Array.empty[File])
@@ -33,11 +33,11 @@ class PowerSound(folder: => Option[File], valueFactor: => Dimensionless,volumeRa
 
   var current = 1
 
-  def setVolume(v: Dimensionless) = this.synchronized {
-    mediaPlayer.foreach(_.setVolume((0.75 * v * v) + (0.25 * v) ))
+  def setVolume(v: Dimensionless): Unit = this.synchronized {
+    mediaPlayer.foreach(_.setVolume(v))
   }
 
-  private def doStop() = {
+  private def doStop(): Unit = {
     this.synchronized {
       mediaPlayer.foreach(_.stop())
       playing = false
@@ -48,17 +48,17 @@ class PowerSound(folder: => Option[File], valueFactor: => Dimensionless,volumeRa
 
   var index = 0
 
-  var lastFolder = folder
+  var lastFolder: Option[File] = folder
 
-  def stop() = this.synchronized {
+  def stop(): Unit = this.synchronized {
     doStop()
   }
 
-  def play() = this.synchronized {
+  def play(): Unit = this.synchronized {
     doPlay()
   }
 
-  private def doPlay() = {
+  private def doPlay(): Unit = {
     if (lastFolder.map(_.getAbsolutePath) != folder.map(_.getAbsolutePath)) {
       mediaPlayer.foreach(_.stop())
       playing = false
