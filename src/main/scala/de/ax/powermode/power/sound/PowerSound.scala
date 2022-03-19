@@ -42,7 +42,7 @@ class PowerSound(folder: => Option[File],
   private def doStop(): Unit = {
     this.synchronized {
       mediaPlayer.foreach(_.stop())
-      while (mediaPlayer.exists(_.playThread.exists(_.isAlive))){
+      while (mediaPlayer.exists(_.playThread.exists(_.isAlive))) {
         logger.info("still playing in thread")
         Thread.sleep(100)
       }

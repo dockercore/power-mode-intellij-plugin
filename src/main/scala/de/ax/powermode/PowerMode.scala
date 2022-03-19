@@ -64,9 +64,10 @@ object PowerMode {
     if (instance != null) {
       instance
     } else {
-        logger.info("No instance!")
+      logger.info("No instance!")
       try {
-        instance=ApplicationManager.getApplication.getService(classOf[PowerMode])
+        instance =
+          ApplicationManager.getApplication.getService(classOf[PowerMode])
         instance.initComponent()
         instance
       } catch {

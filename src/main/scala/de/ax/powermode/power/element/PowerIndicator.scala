@@ -49,7 +49,9 @@ object PowerIndicator {
       }
     }
 
-    if (math.random*100.percent < Seq(1.percent, 0.2 * PowerMode.getInstance.valueFactor).max) {
+    if (math.random * 100.percent < Seq(
+          1.percent,
+          0.2 * PowerMode.getInstance.valueFactor).max) {
       val grand = nextGrand(lastGrand)
       lastGrand = Some(grand)
       grand

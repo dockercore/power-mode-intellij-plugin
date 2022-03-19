@@ -19,11 +19,20 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.event._
 import com.intellij.openapi.editor.{Editor, ScrollingModel}
 import de.ax.powermode.power.ElementOfPower
-import de.ax.powermode.power.element.{PowerBam, PowerFlame, PowerIndicator, PowerSpark}
+import de.ax.powermode.power.element.{
+  PowerBam,
+  PowerFlame,
+  PowerIndicator,
+  PowerSpark
+}
 import de.ax.powermode.{Power, Util}
 import powermode.PowerColor
 import squants.Dimensionless
-import squants.DimensionlessConversions.{DimensionlessConversions, dimensionlessToDouble, each}
+import squants.DimensionlessConversions.{
+  DimensionlessConversions,
+  dimensionlessToDouble,
+  each
+}
 import squants.time.Time._
 import squants.time.Frequency._
 import squants.time.TimeConversions._
@@ -166,7 +175,8 @@ class ElementOfPowerContainer(editor: Editor)
       indicatorWidth.toFloat,
       indicatorWidth.toFloat,
       1000L,
-      editor), getScrollPosition)
+      editor
+    ), getScrollPosition)
   }
 
   def initializeAnimation(point: Point): Unit = {
