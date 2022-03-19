@@ -72,7 +72,7 @@ class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
         dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
       }, ForceTry {
         dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
-      }).toStream.flatMap(o =>
+      }).to(LazyList).flatMap(o =>
         o.toOption.flatMap(Option(_)).map(_.asInstanceOf[Project]))
       maybeProject.headOption.foreach(p => {
         val textEditor: Editor =
