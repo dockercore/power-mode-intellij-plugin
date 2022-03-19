@@ -1,5 +1,6 @@
 package de.ax.powermode.power.sound
 
+import com.intellij.openapi.diagnostic.Logger
 import de.ax.powermode.PowerMode
 import javazoom.jl.player.{FactoryRegistry, HackyJavaSoundAudioDevice}
 import javazoom.jl.player.advanced.{
@@ -7,7 +8,6 @@ import javazoom.jl.player.advanced.{
   PlaybackEvent,
   PlaybackListener
 }
-import org.apache.log4j.Logger
 import squants.Dimensionless
 import squants.DimensionlessConversions.dimensionlessToDouble
 
@@ -37,7 +37,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   val player: AdvancedPlayer = new AdvancedPlayer(stream, soundAudioDevice)
   val listener: PlaybackListener = new PlaybackListener {
     override def playbackStarted(evt: PlaybackEvent): Unit = {
-      logger.debug("playbackStarted")
+      logger.info("playbackStarted")
     }
 
     override def playbackFinished(evt: PlaybackEvent): Unit = {
@@ -87,14 +87,14 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
 
   def play(): Unit = {
     if (playThread.isEmpty) {
-      logger.debug("starting")
+      logger.info("starting")
       playThread = Option(new Thread(new Runnable() {
         override def run(): Unit = {
           try {
             player.play()
           } catch {
-            case e =>
-              logger.error("playback error", e)
+            case e: Throwable =>
+              logger.info("playback info", e)
               notifyHandlers()
               throw e
           } finally {
@@ -115,11 +115,12 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   def stop(): Unit = {
     if (player != null) {
       try {
+        logger.info("stopping")
         player.stop()
       } catch {
         case e: Exception =>
-          logger.debug("error stopping", e)
-        // ignore
+          logger.info("info stopping", e)
+
       }
     }
   }

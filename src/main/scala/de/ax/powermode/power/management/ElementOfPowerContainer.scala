@@ -65,7 +65,7 @@ class ElementOfPowerContainer(editor: Editor)
   var lastUpdate = System.currentTimeMillis()
 
   var lastPositions = Seq.empty[(Point, Point)]
-  editor.getCaretModel.addCaretListener(new CaretAdapter {
+  editor.getCaretModel.addCaretListener(new CaretListener {
 
     def changeCarets: Unit = {
       lastPositions = {
@@ -85,7 +85,7 @@ class ElementOfPowerContainer(editor: Editor)
     override def caretRemoved(e: CaretEvent): Unit = changeCarets
   })
 
-  editor.getDocument.addDocumentListener(new DocumentAdapter {
+  editor.getDocument.addDocumentListener(new DocumentListener {
     override def documentChanged(e: DocumentEvent): Unit = {
       initializeCaretBam(e)
     }
@@ -142,7 +142,7 @@ class ElementOfPowerContainer(editor: Editor)
       Util.getPoint(caret.getVisualPosition, caret.getEditor))
   }
 
-  def updateElementsOfPower() {
+  def updateElementsOfPower(): Unit = {
     var delta = (System.currentTimeMillis() - lastUpdate)
     val value = (1000.0 / powerMode.frameRate.toHertz)
     if (delta > value * 2) {
@@ -153,7 +153,7 @@ class ElementOfPowerContainer(editor: Editor)
     val db: Double = 1000.0 / 16
     if (elementsOfPower.nonEmpty) {
       elementsOfPower =
-        elementsOfPower.seq.filterNot(p => p._1.update((delta / db).toFloat))
+        elementsOfPower.filterNot(p => p._1.update((delta / db).toFloat))
       repaint()
     }
   }
@@ -161,15 +161,15 @@ class ElementOfPowerContainer(editor: Editor)
   def addPowerIndicator(): Unit = {
     val indicatorWidth = 100
     elementsOfPower :+= (PowerIndicator(
-      getMyBounds.width - 20 - indicatorWidth,
-      getMyBounds.height - 20 - indicatorWidth,
-      indicatorWidth,
-      indicatorWidth,
-      1000,
+      (getMyBounds.width - 20 - indicatorWidth).toFloat,
+      (getMyBounds.height - 20 - indicatorWidth).toFloat,
+      indicatorWidth.toFloat,
+      indicatorWidth.toFloat,
+      1000L,
       editor), getScrollPosition)
   }
 
-  def initializeAnimation(point: Point) {
+  def initializeAnimation(point: Point): Unit = {
 
     this.setBounds(getMyBounds)
 
@@ -200,10 +200,10 @@ class ElementOfPowerContainer(editor: Editor)
       y = y - dim / 2
     }
     elementsOfPower :+= (PowerBam(
-      math.max(0, x),
-      math.max(0, y),
-      dim,
-      dim,
+      math.max(0, x).toFloat,
+      math.max(0, y).toFloat,
+      dim.toFloat,
+      dim.toFloat,
       (powerMode.bamLife * powerMode.valueFactor).toMilliseconds.toLong), getScrollPosition)
   }
 
@@ -235,17 +235,17 @@ class ElementOfPowerContainer(editor: Editor)
     }
   }
 
-  def addSpark(x: Int, y: Int) {
+  def addSpark(x: Int, y: Int): Unit = {
     val dx
       : Double = (Math.random * 2) * (if (Math.random > 0.5) -1 else 1) * powerMode.sparkVelocityFactor
     val dy: Double = ((Math.random * -3) - 1) * powerMode.sparkVelocityFactor
     val size = ((Math.random * powerMode.sparkSize) + 1).toInt
     val life = Math.random() * powerMode.getSparkLife * powerMode.valueFactor
-    val powerSpark = PowerSpark(x,
-                                y,
+    val powerSpark = PowerSpark(x.toFloat,
+                                y.toFloat,
                                 dx.toFloat,
                                 dy.toFloat,
-                                size,
+                                size.toFloat,
                                 life.toLong,
                                 genNextColor,
                                 powerMode.gravityFactor.toFloat)
@@ -302,12 +302,12 @@ class ElementOfPowerContainer(editor: Editor)
     (range - (Math.random * 2 * range)).toInt
   }
 
-  def componentResized(e: ComponentEvent) {
+  def componentResized(e: ComponentEvent): Unit = {
     setBounds(getMyBounds)
     logger.trace("Resized")
   }
 
-  def componentMoved(e: ComponentEvent) {
+  def componentMoved(e: ComponentEvent): Unit = {
     setBounds(getMyBounds)
     logger.trace("Moved")
   }
@@ -318,11 +318,11 @@ class ElementOfPowerContainer(editor: Editor)
     rectangle
   }
 
-  def componentShown(e: ComponentEvent) {}
+  def componentShown(e: ComponentEvent): Unit = {}
 
-  def componentHidden(e: ComponentEvent) {}
+  def componentHidden(e: ComponentEvent): Unit = {}
 
-  protected override def paintComponent(g: Graphics) {
+  protected override def paintComponent(g: Graphics): Unit = {
     super.paintComponent(g)
     if (powerMode.isEnabled) {
       if (shakeData.isDefined &&
@@ -334,7 +334,7 @@ class ElementOfPowerContainer(editor: Editor)
     }
   }
 
-  def renderElementsOfPower(g: Graphics) {
+  def renderElementsOfPower(g: Graphics): Unit = {
     val scrollingModel: ScrollingModel = editor.getScrollingModel
     val xyNew = (
       scrollingModel.getHorizontalScrollOffset,

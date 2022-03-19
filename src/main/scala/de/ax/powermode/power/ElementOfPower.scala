@@ -11,7 +11,7 @@ trait ElementOfPower extends Power {
 
   def update(delta: Float): Boolean
 
-  def render(g: Graphics, dxx: Int, dyy: Int)
+  def render(g: Graphics, dxx: Int, dyy: Int): Unit
 
   def life: Long
 

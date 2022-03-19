@@ -26,7 +26,7 @@ class MyCaretListener extends CaretListener with Power {
     modified = true
   }
 
-  private def initializeAnimationByCaretEvent(caret: Caret) {
+  private def initializeAnimationByCaretEvent(caret: Caret): Unit = {
     val isActualEditor = Try {
       Util.isActualEditor(caret.getEditor)
     }.getOrElse(false)

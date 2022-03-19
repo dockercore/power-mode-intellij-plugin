@@ -14,7 +14,7 @@ class MyTypedActionHandler(typedActionHandler: TypedActionHandler)
     extends TypedActionHandler
     with Power {
 
-  def execute(editor: Editor, c: Char, dataContext: DataContext) {
+  def execute(editor: Editor, c: Char, dataContext: DataContext): Unit = {
     if (powerMode.isEnabled) {
       powerMode.increaseHeatup(dataContext = Some(dataContext))
       if (!powerMode.caretAction) {

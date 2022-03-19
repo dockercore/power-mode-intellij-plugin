@@ -15,17 +15,9 @@
  */
 package de.ax.powermode.power.management
 
-import com.intellij.openapi.actionSystem.{
-  DataConstants,
-  DataContext,
-  PlatformCoreDataKeys,
-  PlatformDataKeys
-}
+import com.intellij.openapi.actionSystem.{DataConstants, DataContext, PlatformCoreDataKeys, PlatformDataKeys}
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.event.{
-  EditorFactoryAdapter,
-  EditorFactoryEvent
-}
+import com.intellij.openapi.editor.event.{EditorFactoryEvent, EditorFactoryListener}
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import de.ax.powermode.power.sound.PowerSound
@@ -40,14 +32,14 @@ import scala.util.{Failure, Success, Try}
 /**
   * @author Baptiste Mesta
   */
-class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
+class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
   def ForceTry[X](f: => X): Try[X] = {
     try {
       Success(f).filter(_ != null)
     } catch {
       case e: Throwable =>
         e.printStackTrace()
-        logger.error("error doing ForceTry", e)
+        logger.info("info doing ForceTry", e)
         Failure(e)
     }
   }
@@ -58,15 +50,18 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
   private lazy val triedSound: Try[PowerSound] =
     powerMode.mediaPlayerExists.flatMap { _ =>
       Try {
-        new PowerSound(powerMode.soundsFolder, powerMode.valueFactor, (powerMode.minVolume,powerMode.maxVolume))
+        new PowerSound(powerMode.soundsFolder,
+                       powerMode.valueFactor,
+                       (powerMode.minVolume, powerMode.maxVolume))
       }
-    }
-  lazy val sound = triedSound
 
-  def showIndicator(dataContext: DataContext) {
+    }
+  lazy val sound = synchronized { triedSound }
+
+  def showIndicator(dataContext: DataContext): Unit = {
     if (powerMode.powerIndicatorEnabled && powerMode.isEnabled) {
       val maybeProject: Seq[Project] = Seq(ForceTry {
-        dataContext.getData(DataConstants.PROJECT)
+        dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
       }, ForceTry {
         dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
       }).toStream.flatMap(o =>
@@ -84,7 +79,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
   }
 
   val elementsOfPowerUpdateThread = new Thread(new Runnable() {
-    def run {
+    def run: Unit = {
       while (true) {
         try {
           if (powerMode != null) {
@@ -98,7 +93,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
             }
           }
         } catch {
-          case e: Throwable => PowerMode.logger.error(e.getMessage, e)
+          case e: Throwable => PowerMode.logger.info(e.getMessage, e)
         }
       }
     }
@@ -116,7 +111,7 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
             && powerMode.isSoundsPlaying) {
           if (sound.isFailure && soundErrorLogged + 5000 < System
                 .currentTimeMillis()) {
-            logger.error(sound.failed.get.getMessage, sound.failed.get)
+            logger.info(sound.failed.get.getMessage, sound.failed.get)
             soundErrorLogged += 1
           }
           sound.foreach(_.play())
@@ -126,13 +121,13 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
         sound.foreach(_.setVolume(powerMode.valueFactor))
       } catch {
         case e: Throwable =>
-          logger.error(e.getMessage, e)
+          logger.info(e.getMessage, e)
       }
     }
   })
   elementsOfPowerUpdateThread.start()
 
-  override def editorCreated(event: EditorFactoryEvent) {
+  override def editorCreated(event: EditorFactoryEvent): Unit = {
     val editor: Editor = event.getEditor
     val isActualEditor = Try {
       Util.isActualEditor(editor)
@@ -143,25 +138,25 @@ class ElementOfPowerContainerManager extends EditorFactoryAdapter with Power {
     }
   }
 
-  override def editorReleased(event: EditorFactoryEvent) {
+  override def editorReleased(event: EditorFactoryEvent): Unit = {
     elementsOfPowerContainers.remove(event.getEditor)
   }
 
-  def initializeAnimation(editor: Editor, pos: Point) {
+  def initializeAnimation(editor: Editor, pos: Point): Unit = {
     if (powerMode.isEnabled) {
       SwingUtilities.invokeLater(new Runnable() {
-        def run {
+        def run: Unit = {
           initializeInUI(editor, pos)
         }
       })
     }
   }
 
-  private def initializeInUI(editor: Editor, pos: Point) {
+  private def initializeInUI(editor: Editor, pos: Point): Unit = {
     elementsOfPowerContainers.get(editor).foreach(_.initializeAnimation(pos))
   }
 
-  def dispose {
+  def dispose: Unit = {
     elementsOfPowerUpdateThread.interrupt()
     elementsOfPowerContainers.clear
   }

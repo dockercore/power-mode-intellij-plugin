@@ -75,14 +75,14 @@ object ImageUtil {
             e match {
               case io: IIOException =>
                 PowerMode.logger
-                  .error(
+                  .info(
                     s"could not load image file! Please try to store your PowerMode " +
                       s"Images/Animations in a different folder and restart the application! File not found: '$uri'!",
                     e
                   )
               case ex =>
                 PowerMode.logger
-                  .error(
+                  .info(
                     s"could not load image file! Please try to store your PowerMode " +
                       s"Images/Animations in a different folder and restart the application! File not found: '$uri'!",
                     ex
@@ -91,7 +91,7 @@ object ImageUtil {
             None
           case Success(None) =>
             PowerMode.logger
-              .error(s"could not load image from url '${uri.toURL}'")
+              .info(s"could not load image from url '${uri.toURL}'")
             None
         }
     })
@@ -111,8 +111,8 @@ object ImageUtil {
       urls
     } catch {
       case e: Throwable =>
-        PowerMode.logger.error(
-          s"error getting image urls from '${imagesPath}': ${e.getMessage}",
+        PowerMode.logger.info(
+          s"info getting image urls from '${imagesPath}': ${e.getMessage}",
           e)
         throw e
     }
@@ -187,7 +187,7 @@ object ImageUtil {
   private def mkTmpImg(stream: InputStream): URL = {
     import java.io.File
     val tempFile =
-      File.createTempFile(System.currentTimeMillis() + "_pmtempfile_", ".png")
+      File.createTempFile(s"${System.currentTimeMillis()}_pmtempfile_", ".png")
     tempFile.deleteOnExit()
     writeBytes(
       LazyList.continually(stream.read).takeWhile(_ != -1).map(_.toByte),

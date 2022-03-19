@@ -25,7 +25,7 @@ class ColorEdges(var leftTop: MyPaint = MyPaint(0, 0, 0, 255),
     return rightBottom
   }
 
-  def updateColors(c1: Int) {
+  def updateColors(c1: Int): Unit = {
     leftTop = updateMyPaint(c1, leftTop)
     rightTop = updateMyPaint(c1, rightTop)
     leftBottom = updateMyPaint(c1, leftBottom)
@@ -36,53 +36,53 @@ class ColorEdges(var leftTop: MyPaint = MyPaint(0, 0, 0, 255),
     return MyPaint.withBlue(c)
   }
 
-  def setLeftTop(leftTop: MyPaint) {
+  def setLeftTop(leftTop: MyPaint): Unit = {
     this.leftTop = leftTop
   }
 
-  def setRightTop(rightTop: MyPaint) {
+  def setRightTop(rightTop: MyPaint): Unit = {
     this.rightTop = rightTop
   }
 
-  def setLeftBottom(leftBottom: MyPaint) {
+  def setLeftBottom(leftBottom: MyPaint): Unit = {
     this.leftBottom = leftBottom
   }
 
-  def setRightBottom(rightBottom: MyPaint) {
+  def setRightBottom(rightBottom: MyPaint): Unit = {
     this.rightBottom = rightBottom
   }
 
-  def setRedFrom(redFrom: Int) {
+  def setRedFrom(redFrom: Int): Unit = {
     this.leftTop = leftTop.withRed(redFrom)
     this.leftBottom = leftBottom.withRed(redFrom)
   }
 
-  def setRedTo(redTo: Int) {
+  def setRedTo(redTo: Int): Unit = {
     this.rightTop = rightTop.withRed(redTo)
     this.rightBottom = rightBottom.withRed(redTo)
   }
 
-  def setGreenFrom(redFrom: Int) {
+  def setGreenFrom(redFrom: Int): Unit = {
     this.leftTop = leftTop.withGreen(redFrom)
     this.rightTop = rightTop.withGreen(redFrom)
   }
 
-  def setGreenTo(redTo: Int) {
+  def setGreenTo(redTo: Int): Unit = {
     this.leftBottom = leftBottom.withGreen(redTo)
     this.rightBottom = rightBottom.withGreen(redTo)
   }
 
-  def setBlueFrom(redFrom: Int) {
+  def setBlueFrom(redFrom: Int): Unit = {
     this.leftTop = leftTop.withBlue(redFrom)
     this.leftBottom = leftBottom.withBlue(redFrom)
   }
 
-  def setBlueTo(redTo: Int) {
+  def setBlueTo(redTo: Int): Unit = {
     this.rightTop = rightTop.withBlue(redTo)
     this.rightBottom = rightBottom.withBlue(redTo)
   }
 
-  def setAlpha(alpha: Int) {
+  def setAlpha(alpha: Int): Unit = {
     this.leftTop = leftTop.withAlpha(alpha)
     this.leftBottom = leftBottom.withAlpha(alpha)
     this.rightTop = rightTop.withAlpha(alpha)

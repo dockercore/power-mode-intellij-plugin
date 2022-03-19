@@ -42,7 +42,7 @@ case class PowerSpark(var x: Float,
     !alive
   }
 
-  def render(g: Graphics, dxx: Int, dyy: Int) {
+  def render(g: Graphics, dxx: Int, dyy: Int): Unit = {
     if (alive) {
       val g2d: Graphics2D = g.create.asInstanceOf[Graphics2D]
       g2d.setColor(

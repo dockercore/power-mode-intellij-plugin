@@ -50,19 +50,16 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>de.ax.powermode.PowerMode</implementation-class>
-        </component>
-        <component>
-            <implementation-class>de.ax.powermode.power.hotkeys.HotkeyHeatupListener</implementation-class>
-        </component>
-    </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable groupId="appearance" groupWeight="20" id="power.mode.ii" displayName="Power Mode II"
-                                 instance="de.ax.powermode.PowerModeConfigurable"/>
+                                 instance="de.ax.powermode.PowerModeConfigurable" preload="true"/>
+        <postStartupActivity implementation="de.ax.powermode.PowerModeStartup"/>
+        <applicationService serviceImplementation="de.ax.powermode.power.hotkeys.HotkeyHeatupListener"/>
+        <applicationService serviceImplementation="de.ax.powermode.PowerMode"/>
+
     </extensions>
+
 
     <actions>
 

@@ -79,7 +79,7 @@ case class PowerIndicator(_x: Float,
   override def life = {
 
     if (isLast) {
-      math.max(life2, System.currentTimeMillis() + (initLife * 0.75)) toLong
+      math.max(life2.toDouble, System.currentTimeMillis() + (initLife * 0.75)) toLong
     } else {
       diffLife = Some(
         diffLife.getOrElse(

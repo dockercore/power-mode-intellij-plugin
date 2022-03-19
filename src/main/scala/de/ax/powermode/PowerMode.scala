@@ -21,17 +21,21 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.{
   ApplicationComponent,
   PersistentStateComponent,
+  Service,
   State,
   Storage
 }
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.actionSystem.{
+  EditorActionManager,
+  TypedAction
+}
 import com.intellij.util.xmlb.XmlSerializerUtil
 import de.ax.powermode.PowerMode.logger
 import de.ax.powermode.power.color.ColorEdges
 import de.ax.powermode.power.management.ElementOfPowerContainerManager
 import org.apache.commons.math3.stat.regression.SimpleRegression
-import org.apache.log4j._
+import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.annotations.Nullable
 import squants.Dimensionless
 import squants.DimensionlessConversions.{DimensionlessConversions, each}
@@ -54,15 +58,22 @@ import scala.util.Try
   */
 object PowerMode {
 
-  val logger: Logger = Logger.getLogger(classOf[PowerMode])
-
-  @Nullable def getInstance: PowerMode = {
-    try {
-      ApplicationManager.getApplication.getComponent(classOf[PowerMode])
-    } catch {
-      case e: Throwable =>
-        logger.debug("error getting component: " + e.getMessage(), e)
-        null
+  val logger: Logger = Logger.getInstance(classOf[PowerMode])
+  private var instance: PowerMode = null
+  @Nullable def getInstance: PowerMode = System.out.synchronized {
+    if (instance != null) {
+      instance
+    } else {
+        logger.info("No instance!")
+      try {
+        instance=ApplicationManager.getApplication.getService(classOf[PowerMode])
+        instance.initComponent()
+        instance
+      } catch {
+        case e: Throwable =>
+          logger.debug("info getting component: " + e.getMessage(), e)
+          null
+      }
     }
   }
 
@@ -80,11 +91,17 @@ object PowerMode {
   }
 }
 
+//@Service(Array(Service.Level.APP))
 @State(name = "PowerModeII",
        storages = Array(new Storage(file = "$APP_CONFIG$/power.mode.ii.xml")))
-class PowerMode
-    extends ApplicationComponent
-    with PersistentStateComponent[PowerMode] {
+final class PowerMode
+    extends PersistentStateComponent[PowerMode]
+    with Disposable {
+
+  override def dispose(): Unit = {
+    maybeElementOfPowerContainerManager.foreach(_.dispose)
+  }
+
   type Timestamp = Time
   type HeatupKey = (Option[KeyStroke], Timestamp)
   val mediaPlayerExists: Try[Class[_]] = Try {
@@ -261,42 +278,35 @@ class PowerMode
   def timeFactor: Dimensionless = {
     math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1) * 100.percent
   }
-
-  override def initComponent: Unit = {
-    PowerMode.logger.debug("initComponent...")
+  // NOTE: this is called in the constructor, at the very end of this file 👇
+  def initComponent(): Unit = {
+    PowerMode.logger.info(s"initComponent... ${System.out.hashCode()}",
+                          new Exception("let's trace the origin"))
+    println("initComponentPrinted...")
     val editorFactory = EditorFactory.getInstance
     maybeElementOfPowerContainerManager = Some(
       new ElementOfPowerContainerManager)
     maybeElementOfPowerContainerManager.foreach(
-      editorFactory.addEditorFactoryListener(_, new Disposable() {
-        def dispose: Unit = {}
-      }))
+      editorFactory.addEditorFactoryListener(_, this))
     val editorActionManager = EditorActionManager.getInstance
     EditorFactory
       .getInstance()
       .getEventMulticaster
-      .addCaretListener(new MyCaretListener())
-    maybeElementOfPowerContainerManager.map(
-      cm =>
-        editorActionManager.getTypedAction.setupRawHandler(
-          new MyTypedActionHandler(
-            editorActionManager.getTypedAction.getRawHandler)))
-    PowerMode.logger.debug("initComponent done")
+      .addCaretListener(new MyCaretListener(), this)
+    maybeElementOfPowerContainerManager.map(cm => {
+      val typedAction = TypedAction
+        .getInstance()
+      typedAction
+        .setupRawHandler(new MyTypedActionHandler(typedAction.getRawHandler))
+    })
+    PowerMode.logger.info("initComponent done")
   }
 
-  override def disposeComponent: Unit = {
-    maybeElementOfPowerContainerManager.foreach(_.dispose)
-  }
-
-  override def getComponentName: String = {
-    "PowerModeII"
-  }
-
-  def getState: PowerMode = {
+  override def getState: PowerMode = {
     this
   }
 
-  def loadState(state: PowerMode): Unit = {
+  override def loadState(state: PowerMode): Unit = {
     XmlSerializerUtil.copyBean(state, this)
   }
 

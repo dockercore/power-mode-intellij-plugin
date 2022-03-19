@@ -21,8 +21,8 @@ class PowerSound(folder: => Option[File],
     }
   }
 
-  val ResetPlaying: Runnable = new Runnable {
-    override def run(): Unit = playing = false
+  def resetPlaying(): Unit = {
+    playing = false
   }
 
   def files: Array[File] =
@@ -71,7 +71,8 @@ class PowerSound(folder: => Option[File],
     if (!playing && myFiles != null && !myFiles.isEmpty) {
       index = (Math.random() * (200 * myFiles.length)).toInt % myFiles.length
       val f = myFiles(index)
-      logger.info(s"playing sound file '$f'")
+      logger.info(
+        s"${this.hashCode()} playing sound file '$f' playing=${playing} mediaPlayer=${mediaPlayer}")
       try {
         playing = true
         mediaPlayer = Some {
@@ -79,12 +80,13 @@ class PowerSound(folder: => Option[File],
             new de.ax.powermode.power.sound.MediaPlayer(f, volumeRange)
           mediaPlayer.onError(() => {
             logger.debug("resetting")
-            ResetPlaying.run()
+            resetPlaying()
           })
           mediaPlayer.setVolume(valueFactor)
           mediaPlayer.play()
           mediaPlayer
         }
+        logger.info(s"started playing '$f'")
       } catch {
         case e: Throwable =>
           e.printStackTrace()
