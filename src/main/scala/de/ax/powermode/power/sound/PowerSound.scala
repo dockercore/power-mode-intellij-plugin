@@ -42,6 +42,10 @@ class PowerSound(folder: => Option[File],
   private def doStop(): Unit = {
     this.synchronized {
       mediaPlayer.foreach(_.stop())
+      while (mediaPlayer.exists(_.playThread.exists(_.isAlive))){
+        logger.info("still playing in thread")
+        Thread.sleep(100)
+      }
       mediaPlayer = Option.empty
       playing = false
     }
@@ -58,15 +62,13 @@ class PowerSound(folder: => Option[File],
   }
 
   def play(): Unit = this.synchronized {
+    if (lastFolder.map(_.getAbsolutePath) != folder.map(_.getAbsolutePath)) {
+      doStop()
+    }
     doPlay()
   }
 
   private def doPlay(): Unit = {
-    if (lastFolder.map(_.getAbsolutePath) != folder.map(_.getAbsolutePath)) {
-      mediaPlayer.foreach(_.stop())
-      playing = false
-    }
-
     val myFiles: Array[File] = files
     if (!playing && myFiles != null && !myFiles.isEmpty) {
       index = (Math.random() * (200 * myFiles.length)).toInt % myFiles.length

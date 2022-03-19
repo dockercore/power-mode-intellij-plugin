@@ -117,6 +117,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
       try {
         logger.info("stopping")
         player.stop()
+        logger.info("stopped")
       } catch {
         case e: Exception =>
           logger.info("info stopping", e)
