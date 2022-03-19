@@ -53,13 +53,14 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable groupId="appearance" groupWeight="20" id="power.mode.ii" displayName="Power Mode II"
-                                 instance="de.ax.powermode.PowerModeConfigurable" preload="true"/>
-        <postStartupActivity implementation="de.ax.powermode.PowerModeStartup"/>
+                                 instance="de.ax.powermode.PowerModeConfigurable"/>
         <applicationService serviceImplementation="de.ax.powermode.power.hotkeys.HotkeyHeatupListener"/>
         <applicationService serviceImplementation="de.ax.powermode.PowerMode"/>
-
     </extensions>
 
+    <applicationListeners>
+        <listener class="de.ax.powermode.PowerModeStartup" topic="com.intellij.ide.AppLifecycleListener"/>
+    </applicationListeners>
 
     <actions>
 

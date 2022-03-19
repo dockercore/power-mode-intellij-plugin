@@ -60,7 +60,7 @@ object PowerMode {
 
   val logger: Logger = Logger.getInstance(classOf[PowerMode])
   private var instance: PowerMode = null
-  @Nullable def getInstance: PowerMode = System.out.synchronized {
+  @Nullable def getInstance: PowerMode =  synchronized {
     if (instance != null) {
       instance
     } else {
@@ -289,8 +289,7 @@ final class PowerMode
       new ElementOfPowerContainerManager)
     maybeElementOfPowerContainerManager.foreach(
       editorFactory.addEditorFactoryListener(_, this))
-    val editorActionManager = EditorActionManager.getInstance
-    EditorFactory
+      EditorFactory
       .getInstance()
       .getEventMulticaster
       .addCaretListener(new MyCaretListener(), this)
