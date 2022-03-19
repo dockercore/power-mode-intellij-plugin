@@ -15,7 +15,6 @@ import java.util
 import javax.swing._
 
 class HotkeyHeatupListener extends AWTEventListener with Power {
-  Toolkit.getDefaultToolkit.addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK)
 
   lazy val allActionKeyStrokes: Set[KeyStroke] =
     actionsToKeyStrokes.values.flatten.toSet
@@ -48,11 +47,11 @@ class HotkeyHeatupListener extends AWTEventListener with Power {
                 val isHotkey = allActionKeyStrokes.contains(eventKeyStroke)
                 if (isHotkey) {
                   powerMode.increaseHeatup(
-                    Some(
+                    Option(
                       DataManager
                         .getInstance()
                         .getDataContext(event.getComponent)),
-                    Some(eventKeyStroke))
+                    Option(eventKeyStroke))
                 }
               }
             }
@@ -63,5 +62,5 @@ class HotkeyHeatupListener extends AWTEventListener with Power {
       }
     })
   }
-
+  Toolkit.getDefaultToolkit.addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK)
 }

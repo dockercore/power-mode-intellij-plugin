@@ -18,24 +18,16 @@ package de.ax.powermode
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.{
-  ApplicationComponent,
-  PersistentStateComponent,
-  Service,
-  State,
-  Storage
-}
+import com.intellij.openapi.components.{ApplicationComponent, PersistentStateComponent, Service, State, Storage}
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.actionSystem.{
-  EditorActionManager,
-  TypedAction
-}
+import com.intellij.openapi.editor.actionSystem.{EditorActionManager, TypedAction}
 import com.intellij.util.xmlb.XmlSerializerUtil
 import de.ax.powermode.PowerMode.logger
 import de.ax.powermode.power.color.ColorEdges
 import de.ax.powermode.power.management.ElementOfPowerContainerManager
 import org.apache.commons.math3.stat.regression.SimpleRegression
 import com.intellij.openapi.diagnostic.Logger
+import de.ax.powermode.power.hotkeys.HotkeyHeatupListener
 import org.jetbrains.annotations.Nullable
 import squants.Dimensionless
 import squants.DimensionlessConversions.{DimensionlessConversions, each}
@@ -60,7 +52,7 @@ object PowerMode {
 
   val logger: Logger = Logger.getInstance(classOf[PowerMode])
   private var instance: PowerMode = null
-  @Nullable def getInstance: PowerMode =  synchronized {
+  @Nullable def getInstance: PowerMode = synchronized {
     if (instance != null) {
       instance
     } else {
@@ -289,7 +281,7 @@ final class PowerMode
       new ElementOfPowerContainerManager)
     maybeElementOfPowerContainerManager.foreach(
       editorFactory.addEditorFactoryListener(_, this))
-      EditorFactory
+    EditorFactory
       .getInstance()
       .getEventMulticaster
       .addCaretListener(new MyCaretListener(), this)
@@ -299,6 +291,7 @@ final class PowerMode
       typedAction
         .setupRawHandler(new MyTypedActionHandler(typedAction.getRawHandler))
     })
+    val l= new HotkeyHeatupListener
     PowerMode.logger.info("initComponent done")
   }
 

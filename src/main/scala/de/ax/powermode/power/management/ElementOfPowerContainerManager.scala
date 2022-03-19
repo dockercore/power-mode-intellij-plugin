@@ -16,6 +16,7 @@
 package de.ax.powermode.power.management
 
 import com.intellij.openapi.actionSystem.{
+  CommonDataKeys,
   DataConstants,
   DataContext,
   PlatformCoreDataKeys,
@@ -69,11 +70,12 @@ class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
   def showIndicator(dataContext: DataContext): Unit = {
     if (powerMode.powerIndicatorEnabled && powerMode.isEnabled) {
       val maybeProject: Seq[Project] = Seq(ForceTry {
-        dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
+        dataContext.getData(CommonDataKeys.PROJECT)
       }, ForceTry {
-        dataContext.getData(PlatformCoreDataKeys.PROJECT_CONTEXT)
-      }).to(LazyList).flatMap(o =>
-        o.toOption.flatMap(Option(_)).map(_.asInstanceOf[Project]))
+        dataContext.getData(CommonDataKeys.PROJECT)
+      }).to(LazyList).flatMap { o =>
+        o.toOption.flatMap(Option(_)).map(_.asInstanceOf[Project])
+      }
       maybeProject.headOption.foreach(p => {
         val textEditor: Editor =
           FileEditorManager.getInstance(p).getSelectedTextEditor
