@@ -48,7 +48,7 @@ class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
     } catch {
       case e: Throwable =>
         e.printStackTrace()
-        logger.info("info doing ForceTry", e)
+        logger.debug("info doing ForceTry", e)
         Failure(e)
     }
   }
@@ -103,7 +103,7 @@ class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
             }
           }
         } catch {
-          case e: Throwable => PowerMode.logger.info(e.getMessage, e)
+          case e: Throwable => PowerMode.logger.debug(e.getMessage, e)
         }
       }
     }
@@ -121,7 +121,7 @@ class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
             && powerMode.isSoundsPlaying) {
           if (sound.isFailure && soundErrorLogged + 5000 < System
                 .currentTimeMillis()) {
-            logger.info(sound.failed.get.getMessage, sound.failed.get)
+            logger.debug(sound.failed.get.getMessage, sound.failed.get)
             soundErrorLogged += 1
           }
           sound.foreach(_.play())
@@ -131,7 +131,7 @@ class ElementOfPowerContainerManager extends EditorFactoryListener with Power {
         sound.foreach(_.setVolume(powerMode.valueFactor))
       } catch {
         case e: Throwable =>
-          logger.info(e.getMessage, e)
+          logger.debug(e.getMessage, e)
       }
     }
   })

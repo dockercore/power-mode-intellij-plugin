@@ -43,7 +43,7 @@ class PowerSound(folder: => Option[File],
     this.synchronized {
       mediaPlayer.foreach(_.stop())
       while (mediaPlayer.exists(_.playThread.exists(_.isAlive))) {
-        logger.info("still playing in thread")
+        logger.debug("still playing in thread")
         Thread.sleep(100)
       }
       mediaPlayer = Option.empty
@@ -73,7 +73,7 @@ class PowerSound(folder: => Option[File],
     if (!playing && myFiles != null && !myFiles.isEmpty) {
       index = (Math.random() * (200 * myFiles.length)).toInt % myFiles.length
       val f = myFiles(index)
-      logger.info(
+      logger.debug(
         s"${this.hashCode()} playing sound file '$f' playing=${playing} mediaPlayer=${mediaPlayer}")
       try {
         playing = true
@@ -88,7 +88,7 @@ class PowerSound(folder: => Option[File],
           mediaPlayer.play()
           mediaPlayer
         }
-        logger.info(s"started playing '$f'")
+        logger.debug(s"started playing '$f'")
       } catch {
         case e: Throwable =>
           e.printStackTrace()

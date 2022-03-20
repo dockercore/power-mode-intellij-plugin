@@ -37,7 +37,7 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   val player: AdvancedPlayer = new AdvancedPlayer(stream, soundAudioDevice)
   val listener: PlaybackListener = new PlaybackListener {
     override def playbackStarted(evt: PlaybackEvent): Unit = {
-      logger.info("playbackStarted")
+      logger.debug("playbackStarted")
     }
 
     override def playbackFinished(evt: PlaybackEvent): Unit = {
@@ -87,14 +87,14 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
 
   def play(): Unit = {
     if (playThread.isEmpty) {
-      logger.info("starting")
+      logger.debug("starting")
       playThread = Option(new Thread(new Runnable() {
         override def run(): Unit = {
           try {
             player.play()
           } catch {
             case e: Throwable =>
-              logger.info("playback info", e)
+              logger.debug("playback info", e)
               notifyHandlers()
               throw e
           } finally {
@@ -115,12 +115,12 @@ class MediaPlayer(file: File, volumeRange: => (Dimensionless, Dimensionless))
   def stop(): Unit = {
     if (player != null) {
       try {
-        logger.info("stopping")
+        logger.debug("stopping")
         player.stop()
-        logger.info("stopped")
+        logger.debug("stopped")
       } catch {
         case e: Exception =>
-          logger.info("info stopping", e)
+          logger.debug("info stopping", e)
 
       }
     }

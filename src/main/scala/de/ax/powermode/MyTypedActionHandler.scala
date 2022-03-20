@@ -25,9 +25,9 @@ class MyTypedActionHandler(typedActionHandler: TypedActionHandler)
       typedActionHandler.execute(editor, c, dataContext)
     } catch {
       case x: IllegalStateException =>
-        logger.info(x.getMessage, x)
+        logger.debug(x.getMessage, x)
       case x: IndexOutOfBoundsException =>
-        logger.info(x.getMessage, x)
+        logger.debug(x.getMessage, x)
     }
   }
 

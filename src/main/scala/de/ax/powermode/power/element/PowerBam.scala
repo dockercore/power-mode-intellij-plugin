@@ -16,7 +16,7 @@ case class PowerBam(_x: Float,
                     var _height: Float,
                     initLife: Long)
     extends ElementOfPower {
-  println(s"x ${_x}, y ${_y}, w ${_width}, h ${_height}")
+  logger.debug(s"x ${_x}, y ${_y}, w ${_width}, h ${_height}")
 
   val life = System.currentTimeMillis() + initLife
   var x: Double = _x
@@ -31,8 +31,8 @@ case class PowerBam(_x: Float,
       val bis = ImageUtil.imagesForPath(powerMode.bamImageFolder)
       val img = bis((math.random() * (bis.size - 1)) % bis.size toInt)
       val ih = img.getWidth / img.getHeight.toDouble
-      println(s"img ${img.getWidth} / ${img.getHeight}")
-      println(s"old ${_width} ${_height}")
+      logger.debug(s"img ${img.getWidth} / ${img.getHeight}")
+      logger.debug(s"old ${_width} ${_height}")
       if (ih > 1) {
         _height = (_height / ih).toFloat
         _width = _width
@@ -40,7 +40,7 @@ case class PowerBam(_x: Float,
         _height = _height
         _width = (_width * ih).toFloat
       }
-      println(s"new ${_width} ${_height}")
+      logger.debug(s"new ${_width} ${_height}")
       Option(img)
     } else {
       None

@@ -18,9 +18,18 @@ package de.ax.powermode
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.{ApplicationComponent, PersistentStateComponent, Service, State, Storage}
+import com.intellij.openapi.components.{
+  ApplicationComponent,
+  PersistentStateComponent,
+  Service,
+  State,
+  Storage
+}
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.actionSystem.{EditorActionManager, TypedAction}
+import com.intellij.openapi.editor.actionSystem.{
+  EditorActionManager,
+  TypedAction
+}
 import com.intellij.util.xmlb.XmlSerializerUtil
 import de.ax.powermode.PowerMode.logger
 import de.ax.powermode.power.color.ColorEdges
@@ -56,7 +65,7 @@ object PowerMode {
     if (instance != null) {
       instance
     } else {
-      logger.info("No instance!")
+      logger.debug("No instance!")
       try {
         instance =
           ApplicationManager.getApplication.getService(classOf[PowerMode])
@@ -96,7 +105,8 @@ final class PowerMode
   }
 
   type Timestamp = Time
-  type HeatupKey = (Option[KeyStroke], Timestamp)
+  type CaretCount = Int
+  type HeatupKey = (Option[KeyStroke], Timestamp, CaretCount)
   val mediaPlayerExists: Try[Class[_]] = Try {
     Class.forName("javax.sound.sampled.SourceDataLine")
   }
@@ -111,7 +121,7 @@ final class PowerMode
 
   def setMinVolume(value: Int): Unit = {
     minVolume = value.percent
-    logger.info(s"Setting min volume ${minVolume}")
+    logger.debug(s"Setting min volume ${minVolume}")
     maxVolume = Seq(minVolume, maxVolume).max
   }
 
@@ -119,7 +129,7 @@ final class PowerMode
 
   def setMaxVolume(value: Int): Unit = {
     maxVolume = value.percent
-    logger.info(s"Setting max volume ${maxVolume}")
+    logger.debug(s"Setting max volume ${maxVolume}")
     minVolume = Seq(minVolume, maxVolume).min
   }
 
@@ -185,8 +195,10 @@ final class PowerMode
   def increaseHeatup(
       dataContext: Option[DataContext] = Option.empty[DataContext],
       keyStroke: Option[KeyStroke] = Option.empty[KeyStroke]): Unit = {
-    val ct = System.currentTimeMillis().milliseconds
-    lastKeys = (keyStroke, ct) :: filterLastKeys(ct)
+
+    val currentTime = System.currentTimeMillis().milliseconds
+    lastKeys = (keyStroke, currentTime, myCaretListener.caretCount.get()) :: filterLastKeys(
+      currentTime)
     dataContext.foreach(dc =>
       maybeElementOfPowerContainerManager.foreach(_.showIndicator(dc)))
 
@@ -247,13 +259,13 @@ final class PowerMode
         val MaxKeystrokesOverHeatupTime
           : Dimensionless = heatupTimeMillis * keyStrokesPerMinute
         val vals: Seq[Dimensionless] = lastKeys.map {
-          case (Some(ks), _) =>
+          case (Some(ks), _, caretCount) =>
             val size = Seq(InputEvent.CTRL_DOWN_MASK,
                            InputEvent.ALT_DOWN_MASK,
                            InputEvent.SHIFT_DOWN_MASK)
               .count(m => (ks.getModifiers & m) > 0)
-            (size * hotkeyWeight)
-          case _ => 1.ea
+            (size * hotkeyWeight * caretCount)
+          case (_, _, caretCount) => 1.ea * caretCount
         }
 
         val keystrokesOverHeatupTime: Dimensionless = vals.foldLeft(0.ea)(_ + _)
@@ -271,28 +283,30 @@ final class PowerMode
   def timeFactor: Dimensionless = {
     math.min(math.max(rawTimeFactorFromKeyStrokes, 0), 1) * 100.percent
   }
+  val myCaretListener = new MyCaretListener()
   // NOTE: this is called in the constructor, at the very end of this file 👇
   def initComponent(): Unit = {
-    PowerMode.logger.info(s"initComponent... ${System.out.hashCode()}",
-                          new Exception("let's trace the origin"))
-    println("initComponentPrinted...")
+    PowerMode.logger.debug(s"initComponent... ${System.out.hashCode()}",
+                           new Exception("let's trace the origin"))
+    logger.debug("initComponentPrinted...")
     val editorFactory = EditorFactory.getInstance
     maybeElementOfPowerContainerManager = Some(
       new ElementOfPowerContainerManager)
     maybeElementOfPowerContainerManager.foreach(
       editorFactory.addEditorFactoryListener(_, this))
+
     EditorFactory
       .getInstance()
       .getEventMulticaster
-      .addCaretListener(new MyCaretListener(), this)
+      .addCaretListener(myCaretListener, this)
     maybeElementOfPowerContainerManager.map(cm => {
       val typedAction = TypedAction
         .getInstance()
       typedAction
         .setupRawHandler(new MyTypedActionHandler(typedAction.getRawHandler))
     })
-    val l= new HotkeyHeatupListener
-    PowerMode.logger.info("initComponent done")
+    val l = new HotkeyHeatupListener
+    PowerMode.logger.debug("initComponent done")
   }
 
   override def getState: PowerMode = {
